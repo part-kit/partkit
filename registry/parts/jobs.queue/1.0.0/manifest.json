@@ -1,0 +1,95 @@
+{
+  "manifest_version": 1,
+  "part": "jobs.queue",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "30f6b6196eef56cdd47100c98abf2eebd2fcb59dc99a5c8f3dc6b46264bbad94",
+      "bytes": 9993
+    },
+    {
+      "path": "conformance/jobs.test.ts",
+      "sha256": "1385ca32bf7c9412fac88dbc870d22d3d3f0ce2aaff1c236d3e7ca68e484e414",
+      "bytes": 14011
+    },
+    {
+      "path": "conformance/package.json",
+      "sha256": "c217b78396fd52dccffcf034e3545eb0284bcae68773dc374bf879672dcda017",
+      "bytes": 518
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "27f9527953bf7a7c23a35c480cdef6e6fc7927958352964ee064965c0882d7c2",
+      "bytes": 1037
+    },
+    {
+      "path": "contract.json",
+      "sha256": "14de4c483a7a127ad155c0899cafbd0a09621a2d2a8c91493ebba207f55b67c0",
+      "bytes": 2994
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "289344a3862495a32dc2d40422de5c3fcea813b17a3d5ad179536ee46094d09a",
+      "bytes": 1102
+    },
+    {
+      "path": "examples/serverless-drain.ts",
+      "sha256": "57e19c7628b74b3c7977fc5d71d2b3c7c5539bf3881bc39e81c8a58953c299c5",
+      "bytes": 1484
+    },
+    {
+      "path": "examples/tasks.ts",
+      "sha256": "c6f60c8a23f9cc5bb9ce5266500eb7590d7fb80ad514c4bdb7d2b1ad497dcd8c",
+      "bytes": 1436
+    },
+    {
+      "path": "examples/worker-entrypoint.ts",
+      "sha256": "788b0c36b5084a6d9221d81ba93219b0b53667c80b04ff63bd5bfe223e681bce",
+      "bytes": 1117
+    },
+    {
+      "path": "migrations/001-install-graphile-worker.sql",
+      "sha256": "24792f6800896097602a3cd34d466e9442d014c71a0e2dfc5a3be123f9cdc45e",
+      "bytes": 21311
+    },
+    {
+      "path": "seams.md",
+      "sha256": "ae32df4ef2c4eaea057f084dfdbfc6cbcc37e62be70038fdef6ea205a3cd4a76",
+      "bytes": 6986
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "8fcc67f907bdbf70ecf4d8e526d78026f78a22354e4aba640c363bcb5d71e99a",
+      "bytes": 3143
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "c3d244edd5a6c4c891bdb6011b7898d1d582527eb036d39b9eebf160736e58c9",
+      "bytes": 815
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "49e742d140dc21851e910bc6768c0346ed64abe6fb1b9f73fdf82772dea38b29",
+      "bytes": 2621
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "a1471e68ac22821c1c1bf4abab59156038081b983501e3d7bcccf51e0121ca06",
+      "bytes": 4330
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "beb5734c1347ebce36a80558741d07be9b5c276156ce38c41b6ad21acedaeddd",
+      "bytes": 5577
+    },
+    {
+      "path": "src/internal/worker.ts",
+      "sha256": "00496255cae922ab3c13c89414249979093dc387b19e93a12bbe8bf88e528936",
+      "bytes": 4537
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

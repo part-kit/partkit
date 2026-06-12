@@ -1,0 +1,20 @@
+{
+  "capability": "jobs.cron",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Scheduled recurring jobs (crontab) over the same part-owned Postgres queue. A cron schedule on the worker config enqueues recurring jobs on their pattern; missed runs are backfilled. Wraps graphile-worker's crontab.",
+  "interface": {
+    "exports": [
+      "WorkerConfig.cron?: CronSchedule  (CronSchedule = Array<{ task: string; pattern: string; payload?: object; identifier?: string; backfillSeconds?: number }>)",
+      "runWorker(config: WorkerConfig): Promise<RunningWorker>  — executes the cron schedule (server shape)",
+      "drainOnce(config: WorkerConfig): Promise<void>  — processes due jobs (serverless shape; the platform cron is the trigger)"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "A cron schedule registers recurring jobs that the long-running worker executes on their pattern; a missed run within the configured backfill window is enqueued on startup (verified via backfill)",
+    "An invalid cron pattern is rejected at config time with JobsError('invalid_input') — no worker starts and no job is scheduled"
+  ],
+  "notes": "Same part as jobs.queue (one part, two capabilities — graphile-worker does both). jobs.cron@1 is the scheduling layer over jobs.queue@1's durable queue: a `cron` array on the worker config maps to graphile-worker's crontab. In the SERVER shape (runWorker) graphile-worker's scheduler enqueues recurring jobs and backfills missed runs; in the SERVERLESS shape the platform's cron (e.g. a Vercel/Cloud cron hitting a route) is the trigger that calls drainOnce or enqueue (a long-running cron scheduler is a daemon feature by nature — docs/05 §1, the honest exception). Conformance verifies cron scheduling via backfill against real graphile-worker + Postgres, and the config-time rejection of an invalid pattern DB-free. Suite lives with the implementing part until a second provider exists (docs/02 §3-4)."
+}

@@ -330,3 +330,57 @@ describe("real registry: auth.tenancy installs end-to-end (orgs/memberships/scop
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: jobs.queue installs end-to-end (OSS-wrap; provides jobs.queue@1 + jobs.cron@1)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    // jobs.queue declares graphile-worker in npm_dependencies, so the repo needs
+    // a package.json to merge into.
+    await writeFile(path.join(repo, "package.json"), JSON.stringify({ name: "app", version: "0.0.0" }));
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, merges graphile-worker, vendors the migration, scaffolds no env, verifies green", async () => {
+    const res = await addPart(repo, { name: "jobs.queue" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull(); // graphile-worker is the wrapped library, not an adapter axis
+    expect(res.envKeys).toEqual([]); // connection is passed in code (SqlExecutor + connectionString)
+
+    await stat(path.join(repo, "parts/jobs.queue/src/index.ts"));
+    await stat(path.join(repo, "parts/jobs.queue/seams.md"));
+    await stat(path.join(repo, "parts/jobs.queue/examples/worker-entrypoint.ts"));
+    await stat(path.join(repo, "parts/jobs.queue/examples/serverless-drain.ts"));
+    await stat(path.join(repo, "parts/jobs.queue/ATTESTATION.json"));
+    // owns a schema → its migration is vendored
+    await stat(path.join(repo, "parts/jobs.queue/migrations/001-install-graphile-worker.sql"));
+    await expect(stat(path.join(repo, "parts/jobs.queue/adapters"))).rejects.toThrow();
+    await expect(stat(path.join(repo, ".env.example"))).rejects.toThrow();
+
+    // npm_dependencies (RFC 0001) merged into the consumer's package.json
+    const pkg = JSON.parse(await readFile(path.join(repo, "package.json"), "utf8")) as {
+      dependencies?: Record<string, string>;
+    };
+    expect(pkg.dependencies?.["graphile-worker"]).toBeDefined();
+
+    // DB-backed → flagged to run partkit migrate
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("jobs.queue@1.0.0");
+
+    // verify requires the declared dep installed (RFC 0001 §2b); simulate a
+    // consumer install at the attestation-pinned version.
+    await mkdir(path.join(repo, "node_modules", "graphile-worker"), { recursive: true });
+    await writeFile(
+      path.join(repo, "node_modules", "graphile-worker", "package.json"),
+      JSON.stringify({ name: "graphile-worker", version: "0.16.6" }),
+    );
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

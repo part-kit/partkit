@@ -1,0 +1,27 @@
+{
+  "capability": "jobs.queue",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Durable background jobs with capped exponential-backoff retries and a dead-letter, over a part-owned Postgres schema. Serverless-safe transactional enqueue through a driver-free SqlExecutor seam; processing in either a long-running worker or a serverless drain. Wraps graphile-worker.",
+  "interface": {
+    "exports": [
+      "jobs(db: SqlExecutor): Jobs",
+      "Jobs { enqueue(input: EnqueueInput): Promise<EnqueuedJob>; listFailed(filter?: FailedFilter): Promise<FailedJob[]> }",
+      "runWorker(config: WorkerConfig): Promise<RunningWorker>",
+      "drainOnce(config: WorkerConfig): Promise<void>",
+      "class JobsError extends Error { code: JobsErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration is validated at call time and every failure surfaces as a typed JobsError — the raw driver/library error (which may carry the connection string) never appears in the message",
+    "Invalid input — a blank task name, an empty connection string, or an empty task map — fails fast with JobsError('invalid_input') and performs no work",
+    "enqueue records a job through the SqlExecutor seam (the part-owned add_job function), so it is serverless-safe and can run inside the app's own transaction; it returns the job id and run_at and the job is immediately visible to a worker",
+    "A worker runs the app-provided handler for each due job and removes it on success; the same task map drives both the long-running worker and the serverless drain",
+    "A failing job is retried with capped exponential backoff up to maxAttempts, then stops being retried — the dead-letter; listFailed surfaces exactly the jobs that exhausted their attempts, with their last error",
+    "Enqueuing twice with the same jobKey yields a single job, not two (idempotent enqueue)",
+    "The part owns the graphile_worker schema via its shipped migration and the worker's boot-time migration is a verified no-op against it; every statement the enqueue/read seam issues is fully parameterized and targets only that schema"
+  ],
+  "notes": "Wraps graphile-worker (Postgres-native, portable — no Redis/SQS, runs on plain Node + Postgres). The connection for enqueue/read is an app-provided SqlExecutor seam (the audit.log pattern), so those paths are serverless-safe and transactional; the processing side is graphile-worker's worker behind two shapes (docs/05 §1): a long-running daemon (runWorker) and a serverless cron-drain (drainOnce). The app's task handlers are the composition seam. Schema is part-owned and installed by partkit migrate from graphile-worker's OWN generated SQL (the auth.session pattern); the worker re-checks migrations on boot and finds them applied (no-op). One part also provides jobs.cron@1. The retry/backoff/dead-letter engine that webhooks.dispatch composes on. Conformance runs against real graphile-worker + real Postgres (gated on PARTKIT_TEST_DATABASE_URL) in the isolated harness; validation/typed-error invariants run DB-free. The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

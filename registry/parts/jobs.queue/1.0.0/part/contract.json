@@ -1,0 +1,54 @@
+{
+  "part": "jobs.queue",
+  "version": "1.0.0",
+  "contract_version": "0.2",
+  "provides": [
+    "jobs.queue@1",
+    "jobs.cron@1"
+  ],
+  "requires": [],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "npm_dependencies": {
+    "graphile-worker": "^0.16.0"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "jobs(db: SqlExecutor): Jobs",
+      "Jobs { enqueue(input: EnqueueInput): Promise<EnqueuedJob>; listFailed(filter?: FailedFilter): Promise<FailedJob[]> }",
+      "runWorker(config: WorkerConfig): Promise<RunningWorker>",
+      "drainOnce(config: WorkerConfig): Promise<void>",
+      "class JobsError extends Error { code: JobsErrorCode }",
+      "types: SqlExecutor, EnqueueInput, EnqueuedJob, FailedJob, FailedFilter, WorkerConfig, TaskHandler, TaskHandlers, CronSchedule, CronItem, RunningWorker, Jobs, JobsErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {},
+  "data_ownership": {
+    "tables": [
+      "graphile_worker._private_jobs",
+      "graphile_worker._private_tasks",
+      "graphile_worker._private_job_queues",
+      "graphile_worker._private_known_crontabs",
+      "graphile_worker.migrations"
+    ],
+    "writes_only_own_tables": true
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration is validated at call time and every failure surfaces as a typed JobsError — the raw driver/library error (which may carry the connection string) never appears in the message",
+    "Invalid input — a blank task name, an empty connection string, or an empty task map — fails fast with JobsError('invalid_input') and performs no work",
+    "enqueue records a job through the SqlExecutor seam (the part-owned add_job function), so it is serverless-safe and can run inside the app's own transaction; it returns the job id and run_at and the job is immediately visible to a worker",
+    "A worker runs the app-provided handler for each due job and removes it on success; the same task map drives both the long-running worker (runWorker) and the serverless drain (drainOnce)",
+    "A failing job is retried with capped exponential backoff up to maxAttempts, then stops being retried — the dead-letter; listFailed surfaces exactly the jobs that exhausted their attempts, with their last error",
+    "Enqueuing twice with the same jobKey yields a single job, not two (idempotent enqueue)",
+    "jobs.cron: a cron schedule registers recurring jobs that the worker executes on their pattern (a missed run within the backfill window is enqueued on startup), and an invalid cron pattern is rejected at config time with JobsError('invalid_input')",
+    "The part owns the graphile_worker schema via its shipped migration and the worker's boot-time migration is a verified no-op against it; every statement the enqueue/read seam issues is fully parameterized and targets only that schema"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

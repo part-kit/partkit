@@ -1,0 +1,16 @@
+{
+  "part": "jobs.queue",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:58e2d56f85ab5f4f1e77cc16f3d96877478a8785b70cccfbdb39bb39c33d8cda",
+  "verified_at": "2026-06-12T10:36:29.172Z",
+  "dependency_matrix": {
+    "node": "25.3.0",
+    "npm:graphile-worker": "0.16.6"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 13,
+  "result_hash": "sha256:83811d5a2f28a2ed6fdedc417fd3fdb5d10b9d50d263406567a14268ada2ac45",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-26T10:36:29.172Z"
+}

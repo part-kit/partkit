@@ -68,6 +68,16 @@
       "provides": [
         "auth.tenancy@1"
       ]
+    },
+    "jobs.queue": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "jobs.queue@1",
+        "jobs.cron@1"
+      ]
     }
   }
 }

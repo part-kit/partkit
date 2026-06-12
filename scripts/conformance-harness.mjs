@@ -90,11 +90,31 @@ async function untypedDeps(ws, deps) {
   for (const dep of deps) {
     const pkgDir = path.join(ws, "node_modules", dep);
     let typed = false;
+    let pkg = null;
     try {
-      const pkg = JSON.parse(await readFile(path.join(pkgDir, "package.json"), "utf8"));
+      pkg = JSON.parse(await readFile(path.join(pkgDir, "package.json"), "utf8"));
       typed = Boolean(pkg.types || pkg.typings);
     } catch {
       /* unreadable — treat as opaque */
+    }
+    // Types may ship ALONGSIDE the entry point (e.g. dist/index.js + adjacent
+    // dist/index.d.ts) with no top-level `types` field — tsc resolves these via
+    // `main`/`module`, so the heuristic must too, or a genuinely-typed package
+    // gets a spurious opaque shim that shadows its real types (graphile-worker is
+    // the precedent: ships dist/index.d.ts, no `types` field). Additive — only
+    // reached when the checks above already failed.
+    if (!typed && pkg) {
+      for (const entry of [pkg.main, pkg.module]) {
+        if (typeof entry !== "string") continue;
+        const adjacent = entry.replace(/\.(?:c|m)?js$/i, ".d.ts");
+        try {
+          await readFile(path.join(pkgDir, adjacent));
+          typed = true;
+          break;
+        } catch {
+          /* no entry-adjacent .d.ts */
+        }
+      }
     }
     if (!typed) {
       try {
