@@ -280,7 +280,7 @@ describe("real registry: auth.tenancy installs end-to-end (orgs/memberships/scop
 
   it("adds with no adapter, vendors the migration, flags it, scaffolds no env, verifies green", async () => {
     const res = await addPart(repo, { name: "auth.tenancy" });
-    expect(res.version).toBe("1.0.0");
+    expect(res.version).toBe("1.1.0"); // 1.1.0 added data_ownership.reads (RFC 0004)
     expect(res.adapter).toBeNull(); // the connection is an app seam, not a vendored adapter
     expect(res.envKeys).toEqual([]); // driver-free, configured in code (no env)
 
@@ -300,7 +300,7 @@ describe("real registry: auth.tenancy installs end-to-end (orgs/memberships/scop
     expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
-    expect(agents).toContain("auth.tenancy@1.0.0");
+    expect(agents).toContain("auth.tenancy@1.1.0");
 
     const ver = await verifyRepo(repo);
     expect(ver.ok).toBe(true);
@@ -313,7 +313,7 @@ describe("real registry: auth.tenancy installs end-to-end (orgs/memberships/scop
     expect(res.version).toBe("1.0.0");
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
-    expect(agents).toContain("auth.tenancy@1.0.0");
+    expect(agents).toContain("auth.tenancy@1.1.0");
     expect(agents).toContain("auth.session@1.0.0");
 
     // verify requires auth.session's declared npm deps to be installed (RFC 0001
@@ -379,6 +379,40 @@ describe("real registry: jobs.queue installs end-to-end (OSS-wrap; provides jobs
       path.join(repo, "node_modules", "graphile-worker", "package.json"),
       JSON.stringify({ name: "graphile-worker", version: "0.16.6" }),
     );
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});
+
+describe("real registry: admin.crud installs end-to-end (RFC 0004; owns no tables; requires auth.session)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, no env, no migration (owns no tables), verifies green", async () => {
+    const res = await addPart(repo, { name: "admin.crud" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull(); // schema-driven, no adapter axis
+    expect(res.envKeys).toEqual([]); // configured in code (resources + db + mutators)
+
+    await stat(path.join(repo, "parts/admin.crud/src/index.ts"));
+    await stat(path.join(repo, "parts/admin.crud/seams.md"));
+    await stat(path.join(repo, "parts/admin.crud/examples/admin-routes.ts"));
+    await stat(path.join(repo, "parts/admin.crud/ATTESTATION.json"));
+    await expect(stat(path.join(repo, "parts/admin.crud/adapters"))).rejects.toThrow();
+    await expect(stat(path.join(repo, ".env.example"))).rejects.toThrow();
+
+    // admin.crud owns no tables → no migration, no migrate flag
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(false);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("admin.crud@1.0.0");
 
     const ver = await verifyRepo(repo);
     expect(ver.ok).toBe(true);

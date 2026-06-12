@@ -67,6 +67,36 @@ export const ContractSchema = z.object({
     .object({
       tables: z.array(z.string()),
       writes_only_own_tables: z.boolean(),
+      // RFC 0004 — declared read surface for schema-driven admin tooling. Optional;
+      // admin tools may SELECT only these tables/columns and write only via the
+      // named public-export mutators. A column with redact:true is never read.
+      reads: z
+        .record(
+          z.object({
+            label: z.string().optional(),
+            primary_key: z.union([z.string(), z.array(z.string()).min(1)]),
+            order_by: z.string().optional(),
+            columns: z
+              .array(
+                z.object({
+                  name: z.string(),
+                  type: z.string(),
+                  label: z.string().optional(),
+                  redact: z.boolean().optional(),
+                  references_capability: z.string().optional(),
+                }),
+              )
+              .min(1),
+            mutations: z
+              .object({
+                create: z.string().optional(),
+                update: z.string().optional(),
+                delete: z.string().optional(),
+              })
+              .optional(),
+          }),
+        )
+        .optional(),
     })
     .optional(),
   invariants: z.array(z.string()).default([]),

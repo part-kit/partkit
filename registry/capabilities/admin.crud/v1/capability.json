@@ -1,0 +1,25 @@
+{
+  "capability": "admin.crud",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Schema-driven internal admin over other parts' tables, driven entirely by their declared data_ownership.reads (RFC 0004). Reads project only declared, non-redacted columns through the SqlExecutor seam; writes dispatch to the parts' public-export mutators. No compile-time dependency on the parts it administers.",
+  "interface": {
+    "exports": [
+      "admin(config: AdminConfig): Admin",
+      "Admin { resources(): ResourceInfo[]; list(table: string, opts?: ListOptions): Promise<AdminRow[]>; get(table: string, key: KeyInput): Promise<AdminRow | null>; create(table: string, input: Record<string, unknown>): Promise<unknown>; update(table: string, key: KeyInput, patch: Record<string, unknown>): Promise<unknown>; remove(table: string, key: KeyInput): Promise<unknown> }",
+      "collectReads(contracts: ContractLike[]): ResourceDeclaration[]",
+      "class AdminError extends Error { code: AdminErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; every failure surfaces as a typed AdminError, and the raw driver error never escapes",
+    "Reads project ONLY the declared, non-redacted columns of a table declared in data_ownership.reads — a redacted or undeclared column is never selected or returned",
+    "A read or write against a table not declared in any installed part's reads fails with AdminError('unknown_resource') and issues zero SQL — there is no raw-table fallback, and a part declaring no reads contributes no resources",
+    "Admin writes never issue SQL: create/update/remove dispatch to the part's declared mutation export via the app-wired mutator; a table with no mutation for the action is read-only (AdminError('read_only')), and a mutator's own typed errors propagate unchanged so the part's invariants stay enforced where they live",
+    "Every identifier put into SQL (schema, table, column, order_by) is validated as a strict identifier and double-quoted, and every value is parameterized — a malformed reads declaration or a key carrying SQL metacharacters can never inject",
+    "admin.crud carries no compile-time or runtime dependency on the parts it administers — it operates purely off the passed reads declarations, the SqlExecutor seam, and the mutator registry, so it can administer a part it has no knowledge of"
+  ],
+  "notes": "RFC 0004. The backoffice skeleton's distinctive part. Generic admin must not break two PartKit invariants: the import boundary (a generic admin cannot import each part's internals) and data ownership (only the owning part writes its tables, and invariants live in its mutators). The fix: the readable shape is a versioned contract surface (data_ownership.reads — per table, the columns admin may SELECT, redact:true never read) and all writes flow through the part's public mutators (the mutations map → public exports the app wires). admin.crud adds NO requires on administered parts; it discovers them at runtime from contracts and adapts. It requires auth.session>=1 for staff auth (the app gates the admin routes) and composes with audit.log to record admin actions (documented seam). Owns no domain tables. Conformance runs against real Postgres (gated on PARTKIT_TEST_DATABASE_URL) with a fixture table + synthetic reads proving the projection, the write-boundary dispatch, and injection-safety; validation/typed-error/unknown-resource/read-only invariants run DB-free. The suite lives with the implementing part until a second provider exists (docs/02 §3-4)."
+}

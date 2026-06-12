@@ -42,10 +42,9 @@ h1, h2, h3 { line-height: 1.15; margin: 0 0 1rem; letter-spacing: -0.02em; }
 /* ── header / footer ─────────────────────────────────────────── */
 .site-header { border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(10, 11, 13, 0.86); backdrop-filter: blur(10px); z-index: 10; }
 .header-row { display: flex; align-items: center; justify-content: space-between; height: 58px; }
-.wordmark { font-family: var(--mono); font-weight: 700; font-size: 19px; letter-spacing: -0.03em; display: flex; align-items: center; gap: 9px; }
+.wordmark { font-family: var(--mono); font-weight: 700; font-size: 19px; letter-spacing: -0.03em; display: flex; align-items: center; }
 .wordmark b { font-weight: 700; }
 .wordmark span { color: var(--accent); }
-.wordmark-symbol { height: 19px; width: auto; display: block; }
 .nav { display: flex; gap: 22px; font-size: 14px; color: var(--text-dim); }
 .nav a:hover { color: var(--text); }
 .site-footer { border-top: 1px solid var(--border); margin-top: 96px; background: var(--bg-inset); }

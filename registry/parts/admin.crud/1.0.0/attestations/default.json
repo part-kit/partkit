@@ -1,0 +1,15 @@
+{
+  "part": "admin.crud",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:af25a00b73bf8db6f2f3dba62f598c86c5a26a7795f8e7cb355706a6d915a6d6",
+  "verified_at": "2026-06-12T11:54:48.969Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 9,
+  "result_hash": "sha256:06e260f539378ccd335a3260fe9d9ea559427e1098a25c28ef8aafd1dda2ba61",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-26T11:54:48.970Z"
+}

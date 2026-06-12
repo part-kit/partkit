@@ -177,15 +177,15 @@ Shipped, and now the **reference patterns** to copy:
 - ✅ `audit.log` 1.0.0 — first DB part; the **DB-conformance pattern** (real-PG invariants gated on `PARTKIT_TEST_DATABASE_URL`, validation/typed-error invariants DB-free) reused by every DB part below; DB-enforced append-only.
 - ✅ `storage.upload` 1.0.0 — zero-dep, no-adapter (one S3 wire format, provider = config); offline conformance via AWS-CLI known-answer vectors; the **portability** precedent (any S3-compatible host, self-hostable MinIO).
 - ✅ `auth.session` 1.0.0 — first **OSS-wrapping part** (Better Auth; `npm_dependencies`, contract_version 0.2); migration derived from the library's own schema generator. The pattern for every wrapped part.
-- ✅ `auth.tenancy` 1.0.0 — orgs/memberships/roles + the **row-level-scoping gate** (`requireMembership`, enumeration-safe); first part with a **`requires` edge** (`auth.session>=1`) — references the principal by opaque `user_id` with **no FK** to `auth_user` (cross-part boundary kept in the DB). Never-ownerless and last-owner rules enforced in single-statement **CTEs** (atomic through a pooled `SqlExecutor`); zero-adapter/zero-env DB part. 13 conformance tests.
+- ✅ `auth.tenancy` 1.0.0 — orgs/memberships/roles + the **row-level-scoping gate** (`requireMembership`, enumeration-safe); first part with a **`requires` edge** (`auth.session>=1`) — references the principal by opaque `user_id` with **no FK** to `auth_user` (cross-part boundary kept in the DB). Never-ownerless and last-owner rules enforced in single-statement **CTEs** (atomic through a pooled `SqlExecutor`); zero-adapter/zero-env DB part. 13 conformance tests. **1.1.0** adds `data_ownership.reads` (RFC 0004) so `admin.crud` administers its tables — the first additive minor + first `migrations/<from>-<to>/seam-changes.md`.
 - ✅ `jobs.queue` 1.0.0 — wraps graphile-worker; **one part, two capabilities** (`jobs.queue@1` + `jobs.cron@1`); ships both worker shapes (server daemon `runWorker` + serverless drain `drainOnce`). Serverless-safe transactional enqueue via the `SqlExecutor` seam (graphile-worker loaded with a lazy dynamic import); retry/backoff/dead-letter; cron via backfill. First part through the **isolated-conformance harness** (graphile-worker auto-isolated, attestation-pinned 0.16.6, `pg` a `conformance/package.json` test dep). Owns the `graphile_worker` schema (dedicated schema = stronger boundary; migration generated from graphile-worker's own migrator, worker boot-migrate a verified no-op). 13 conformance tests. The retry engine `webhooks.dispatch` (#12) composes on.
+- ✅ `admin.crud` 1.0.0 — **RFC 0004**: schema-driven back office over OTHER parts' declared `data_ownership.reads`. Reads project only declared, non-redacted columns (`redact:true` never fetched) via the `SqlExecutor` seam; writes route through the parts' public-export **mutators** (admin issues **no write SQL** — last-owner/append-only invariants stay in the part); **no compile-time dependency** on administered parts (runtime-adaptive from contracts; conformance administers a fictional part to prove it). Identifiers validated+quoted, values parameterized. `requires: auth.session>=1` (staff auth); composes with `audit.log`. Owns no tables. 9 conformance tests. Completes the `saas` core ten bar one (billing).
 
 Remaining, in this order:
 
 | # | Part | Guidance | Blocked on |
 |---|---|---|---|
 | 9 | `billing.subscription` | The flagship. Hardest conformance (replay, ordering, checkout/webhook races — docs/02 §4). **Composes on `webhooks.ingest`** for inbound verification — document and wire that seam (don't re-implement signature checking). Stripe test-mode keys are a **human checkpoint**. | webhooks.ingest, auth.session |
-| 10 | `admin.crud` | Schema-driven admin over part-owned tables. Needs a data-ownership "reads" story — **small spec RFC first** (RFC 0004; how a part exposes its tables for read/admin without breaking the boundary). The `backoffice` pack's distinctive part. | data-ownership RFC; several above |
 
 ### Wave 2 — unlock the other three skeletons
 
@@ -242,8 +242,13 @@ own session — or flag it to the human and pick the next unblocked part:
 - **Pack definitions + `partkit plan --pack <name>`** — `registry/packs/*.json`
   exist (the four skeletons, §4); wire `plan`/resolver to accept `--pack` so an
   agent can scaffold a whole skeleton in one call. Small, high-leverage.
-- **RFC 0004 — data-ownership "reads"** — before `admin.crud` (#10): how a part
-  exposes its owned tables for read/admin without breaking the import boundary.
+- ✅ **RFC 0004 — data-ownership "reads"** — accepted 2026-06-12 (docs/rfcs/),
+  with the enabling `data_ownership.reads` field implemented in `contract.ts`.
+  `admin.crud` (#10) is unblocked: admin tooling reads only declared
+  tables/columns and writes only via the part's public mutators, so the import
+  boundary and each part's invariants hold. Existing parts gain `reads` only in a
+  future version (it is hashed content) — the admin.crud build should add `reads`
+  to one or two parts so the demo back office has real tables.
 - Sigstore signing (replaces `dev:unsigned`; `verify` already fails closed on
   `sigstore:` until real verification exists — keep it that way)
 

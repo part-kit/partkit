@@ -61,9 +61,10 @@
       ]
     },
     "auth.tenancy": {
-      "latest": "1.0.0",
+      "latest": "1.1.0",
       "versions": [
-        "1.0.0"
+        "1.0.0",
+        "1.1.0"
       ],
       "provides": [
         "auth.tenancy@1"
@@ -77,6 +78,15 @@
       "provides": [
         "jobs.queue@1",
         "jobs.cron@1"
+      ]
+    },
+    "admin.crud": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "admin.crud@1"
       ]
     }
   }

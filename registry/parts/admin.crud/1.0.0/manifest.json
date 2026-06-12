@@ -1,0 +1,80 @@
+{
+  "manifest_version": 1,
+  "part": "admin.crud",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "95a298eda593eff77cbddbfd5ff946c229bb21614d622752aa9dcf3b3ace3213",
+      "bytes": 7797
+    },
+    {
+      "path": "conformance/admin.test.ts",
+      "sha256": "6cff82af4bed08eca26d3f1eae8e5fc939bf6603c36baf58380a5b453ee2a067",
+      "bytes": 12471
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "ad2335df71e6cab3f85dedb7a4b265a24b212e99bba511499454bdbc0fd07740",
+      "bytes": 902
+    },
+    {
+      "path": "contract.json",
+      "sha256": "37269cddbd9d503e62b3c28894b24b68a6326d8ba092ae4f3e97f240f907ba53",
+      "bytes": 2613
+    },
+    {
+      "path": "examples/admin-routes.ts",
+      "sha256": "117328c8a698c4f6a6372cffda259ae2320befd96bc2132d0a0a9df3139db460",
+      "bytes": 3024
+    },
+    {
+      "path": "examples/load-resources.ts",
+      "sha256": "e9a92dbb08da8e0fa8306cb4c48ba071b48e47cb12bdd0f9daed8236b0a21a7d",
+      "bytes": 1346
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "aa414b2c5f4365676fc39f44bed3ae5a0fc49698a823c368b6011c09d1ffe4fc",
+      "bytes": 922
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "seams.md",
+      "sha256": "3748434810af5eb6fb7b4184fcb558da41ce64b5679fab3fb37628c72a2c903a",
+      "bytes": 5185
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "14b3f885af2cf2bac78a25fa467a5a55a2feff8f0fcc9adb46b08d2fc805dd8f",
+      "bytes": 7258
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "6f3bcd49fc9799eeba5e98affde850c38343704b4a25cf3800061860f62a5a7f",
+      "bytes": 1053
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "71926831e85d1cf38bea4fedcf28907883b85d7f3a0fe4af07bda731ba22c2d4",
+      "bytes": 1291
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "b9e0ed60d52d08d19d51e550507d4c5741b3f55de59bfd4f9c509fb2e3fbba03",
+      "bytes": 4335
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "457b95774d1756268afb27fbed76265ced1c94bfc6834f5014141e586cc8debe",
+      "bytes": 5356
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

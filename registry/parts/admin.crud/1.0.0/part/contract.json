@@ -1,0 +1,39 @@
+{
+  "part": "admin.crud",
+  "version": "1.0.0",
+  "contract_version": "0.1",
+  "provides": [
+    "admin.crud@1"
+  ],
+  "requires": [
+    "auth.session>=1"
+  ],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "admin(config: AdminConfig): Admin",
+      "Admin { resources(): ResourceInfo[]; list(table: string, opts?: ListOptions): Promise<AdminRow[]>; get(table: string, key: KeyInput): Promise<AdminRow | null>; create(table: string, input: Record<string, unknown>): Promise<unknown>; update(table: string, key: KeyInput, patch: Record<string, unknown>): Promise<unknown>; remove(table: string, key: KeyInput): Promise<unknown> }",
+      "collectReads(contracts: ContractLike[]): ResourceDeclaration[]",
+      "class AdminError extends Error { code: AdminErrorCode }",
+      "types: SqlExecutor, AdminConfig, ResourceDeclaration, ReadsMap, ReadDescriptor, ColumnDescriptor, MutatorRegistry, Mutator, ResourceInfo, AdminRow, KeyInput, ListOptions, Admin, AdminErrorCode, ContractLike"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {},
+  "invariants": [
+    "Importing the part performs no I/O and never throws; every failure surfaces as a typed AdminError, and the raw driver error never escapes",
+    "Reads project ONLY the declared, non-redacted columns of a table declared in data_ownership.reads — a redacted or undeclared column is never selected or returned",
+    "A read or write against a table not declared in any installed part's reads fails with AdminError('unknown_resource') and issues zero SQL — there is no raw-table fallback, and a part declaring no reads contributes no resources",
+    "Admin writes never issue SQL: create/update/remove dispatch to the part's declared mutation export via the app-wired mutator; a table with no mutation for the action is read-only (AdminError('read_only')), and a mutator's own typed errors propagate unchanged so the part's invariants stay enforced where they live",
+    "Every identifier put into SQL (schema, table, column, order_by) is validated as a strict identifier and double-quoted, and every value is parameterized — a malformed reads declaration or a key carrying SQL metacharacters can never inject",
+    "admin.crud carries no compile-time or runtime dependency on the parts it administers — it operates purely off the passed reads declarations, the SqlExecutor seam, and the mutator registry, so it can administer a part it has no knowledge of"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

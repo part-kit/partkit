@@ -29,8 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="site-header">
           <div className="container header-row">
             <Link href="/" className="wordmark" aria-label="PartKit — home">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="wordmark-symbol" src="/symbol-partkit.svg" alt="" width={23} height={19} />
               <b>
                 Part<span>Kit</span>
               </b>

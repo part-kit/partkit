@@ -102,4 +102,46 @@ describe("ContractSchema", () => {
     expect(effectiveNpmDependencies(c, "paddle")).toEqual({ "better-auth": "^1.3.0" });
     expect(effectiveNpmDependencies(c, null)).toEqual({ "better-auth": "^1.3.0" });
   });
+
+  it("data_ownership.reads (RFC 0004) is optional and validates the descriptor shape", () => {
+    // Absent reads — still valid (the pre-RFC-0004 shape).
+    expect(() => ContractSchema.parse(DOCS_EXAMPLE)).not.toThrow();
+
+    const withReads = ContractSchema.parse({
+      ...DOCS_EXAMPLE,
+      data_ownership: {
+        tables: ["billing_subscriptions"],
+        writes_only_own_tables: true,
+        reads: {
+          billing_subscriptions: {
+            label: "Subscriptions",
+            primary_key: "id",
+            order_by: "created_at desc",
+            columns: [
+              { name: "id", type: "uuid" },
+              { name: "user_id", type: "uuid", references_capability: "auth.session" },
+              { name: "secret_token", type: "string", redact: true },
+            ],
+            mutations: { delete: "cancelAtPeriodEnd" },
+          },
+        },
+      },
+    });
+    expect(withReads.data_ownership?.reads?.billing_subscriptions?.columns).toHaveLength(3);
+    expect(withReads.data_ownership?.reads?.billing_subscriptions?.mutations?.delete).toBe(
+      "cancelAtPeriodEnd",
+    );
+
+    // A read table must declare at least one column.
+    expect(() =>
+      ContractSchema.parse({
+        ...DOCS_EXAMPLE,
+        data_ownership: {
+          tables: ["billing_subscriptions"],
+          writes_only_own_tables: true,
+          reads: { billing_subscriptions: { primary_key: "id", columns: [] } },
+        },
+      }),
+    ).toThrow();
+  });
 });

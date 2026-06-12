@@ -1,0 +1,15 @@
+{
+  "part": "auth.tenancy",
+  "version": "1.1.0",
+  "adapter": null,
+  "content_hash": "sha256:70290ade96c7b562ead2c48a45ccca4a6bbfef898cb3834d6fe6eb1eea97205d",
+  "verified_at": "2026-06-12T16:56:51.295Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 13,
+  "result_hash": "sha256:40d092d8064c0b2452c68bf0c70a09543cf8cea5ed5ebecb334f4845f92c12bc",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-26T16:56:51.296Z"
+}
