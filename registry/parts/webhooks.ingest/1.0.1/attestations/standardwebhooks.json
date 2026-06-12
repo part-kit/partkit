@@ -3,13 +3,13 @@
   "version": "1.0.1",
   "adapter": "standardwebhooks",
   "content_hash": "sha256:2aed99d2290c59e12fd1030078da62e36c0e2fb4496172305c6a5aea04fb9183",
-  "verified_at": "2026-06-12T07:24:31.179Z",
+  "verified_at": "2026-06-12T07:42:01.513Z",
   "dependency_matrix": {
     "node": "22.22.3"
   },
-  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401181391",
+  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401979989",
   "tests_passed": 18,
-  "result_hash": "sha256:60fcaa02f26a624b1a10633c79d60e7fbdbf0e0e1c6a12bbb56db4d7c4a53113",
+  "result_hash": "sha256:a4c9f7e3f181ccc73d9a403388e6db45c55f42b5ac8e00fbc2e101408b61ef3d",
   "signature": "dev:unsigned",
-  "expires": "2026-06-26T07:24:31.179Z"
+  "expires": "2026-06-26T07:42:01.513Z"
 }

@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "adapter": null,
   "content_hash": "sha256:ee4fd4288825b890a5b0cf79a66759a31b0a5d62cf7a83b043b9b3e35350cc11",
-  "verified_at": "2026-06-12T07:24:41.559Z",
+  "verified_at": "2026-06-12T07:42:12.000Z",
   "dependency_matrix": {
     "node": "22.22.3",
     "npm:better-auth": "1.6.16",
     "npm:pg": "8.21.0"
   },
-  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401181391",
+  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401979989",
   "tests_passed": 7,
-  "result_hash": "sha256:9a8a86b635ebc4deac3314fd988a6face89fe3e9a554bc0e1447a6055677eb82",
+  "result_hash": "sha256:9da57d97a1d610ae50350c873e8eb9b5711209ec6ae29c593c6e01a974256ec7",
   "signature": "dev:unsigned",
-  "expires": "2026-06-26T07:24:41.559Z"
+  "expires": "2026-06-26T07:42:12.000Z"
 }

@@ -3,13 +3,13 @@
   "version": "1.0.1",
   "adapter": null,
   "content_hash": "sha256:c68d04ab0ed61f55f0d05e51d4d7cc6f468e2748d29a8ed9c40e2b2abd1e8987",
-  "verified_at": "2026-06-12T07:24:35.419Z",
+  "verified_at": "2026-06-12T07:42:05.821Z",
   "dependency_matrix": {
     "node": "22.22.3"
   },
-  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401181391",
+  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401979989",
   "tests_passed": 9,
-  "result_hash": "sha256:5faf6030311e7f76d6cd39a2d8c954f8f3b6567a438db2e6610a45883bb027dc",
+  "result_hash": "sha256:549d7377b11a5dde96460995ceecd52702d4d3ea8f432d95cec8e3f1917a203d",
   "signature": "dev:unsigned",
-  "expires": "2026-06-26T07:24:35.419Z"
+  "expires": "2026-06-26T07:42:05.821Z"
 }
