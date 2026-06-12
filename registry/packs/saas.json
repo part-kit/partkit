@@ -1,0 +1,24 @@
+{
+  "pack": "saas",
+  "title": "Team SaaS",
+  "summary": "Multi-tenant subscription product: sign-in, organizations, paid plans, transactional email, verified billing webhooks, uploads, background jobs, rate limiting, an audit trail, and an internal back office. The reference skeleton — the acme demo.",
+  "capabilities": [
+    "auth.session",
+    "auth.tenancy",
+    "billing.subscription",
+    "email.transactional",
+    "webhooks.ingest",
+    "storage.upload",
+    "jobs.queue",
+    "ratelimit.api",
+    "audit.log",
+    "admin.crud"
+  ],
+  "seams_the_agent_writes": [
+    "pricing page + PlanCatalog",
+    "org switcher + invite flow UI",
+    "email templates (welcome / receipt / invite)",
+    "weekly digest content",
+    "the product itself"
+  ]
+}

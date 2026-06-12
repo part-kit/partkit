@@ -1,0 +1,21 @@
+{
+  "pack": "marketplace",
+  "title": "Content / marketplace",
+  "summary": "A two-sided or content-heavy product: sign-in, seller/creator organizations, subscriptions, media upload, full-text search, feature flags for gradual rollout, and transactional email. Reuses most of the SaaS skeleton and adds discovery + rollout control.",
+  "capabilities": [
+    "auth.session",
+    "auth.tenancy",
+    "billing.subscription",
+    "storage.upload",
+    "search.fulltext",
+    "flags.feature",
+    "email.transactional"
+  ],
+  "distinctive": ["search.fulltext", "flags.feature"],
+  "seams_the_agent_writes": [
+    "listing / content pages",
+    "search UI + ranking choices",
+    "seller onboarding",
+    "the product itself"
+  ]
+}

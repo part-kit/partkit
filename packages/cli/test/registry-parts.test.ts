@@ -264,3 +264,69 @@ describe("real registry: auth.session installs end-to-end (first OSS-wrapping pa
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: auth.tenancy installs end-to-end (orgs/memberships/scoping; requires auth.session)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    // auth.session (added in the coexistence test below) has npm_dependencies,
+    // so the repo needs a package.json to merge into.
+    await writeFile(path.join(repo, "package.json"), JSON.stringify({ name: "app", version: "0.0.0" }));
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, vendors the migration, flags it, scaffolds no env, verifies green", async () => {
+    const res = await addPart(repo, { name: "auth.tenancy" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull(); // the connection is an app seam, not a vendored adapter
+    expect(res.envKeys).toEqual([]); // driver-free, configured in code (no env)
+
+    await stat(path.join(repo, "parts/auth.tenancy/src/index.ts"));
+    await stat(path.join(repo, "parts/auth.tenancy/seams.md"));
+    await stat(path.join(repo, "parts/auth.tenancy/examples/scoped-route.ts"));
+    await stat(path.join(repo, "parts/auth.tenancy/ATTESTATION.json"));
+    // the part owns tables → its migration is vendored
+    await stat(path.join(repo, "parts/auth.tenancy/migrations/001-create-tenant-tables.sql"));
+    await expect(stat(path.join(repo, "parts/auth.tenancy/adapters"))).rejects.toThrow();
+
+    // no env scaffolding for a part that declares no env
+    const env = await readFile(path.join(repo, ".env.example"), "utf8").catch(() => "");
+    expect(env).toBe("");
+
+    // a DB-backed part is flagged so the consumer knows to run `partkit migrate`
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("auth.tenancy@1.0.0");
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+
+  it("coexists with auth.session — the saas tenancy pairing installs side by side", async () => {
+    // auth.tenancy references auth.session's principal; the two are distinct
+    // capabilities, so they coexist (no anti-sprawl conflict).
+    const res = await addPart(repo, { name: "auth.session" });
+    expect(res.version).toBe("1.0.0");
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("auth.tenancy@1.0.0");
+    expect(agents).toContain("auth.session@1.0.0");
+
+    // verify requires auth.session's declared npm deps to be installed (RFC 0001
+    // §2b); simulate a consumer install at the attestation-pinned versions.
+    for (const [dep, version] of [["better-auth", "1.6.16"], ["pg", "8.21.0"]] as const) {
+      await mkdir(path.join(repo, "node_modules", dep), { recursive: true });
+      await writeFile(
+        path.join(repo, "node_modules", dep, "package.json"),
+        JSON.stringify({ name: dep, version }),
+      );
+    }
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

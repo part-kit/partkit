@@ -19,6 +19,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { runIsolatedConformance } from "./conformance-harness.mjs";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 
@@ -37,6 +38,17 @@ function arg(name, fallback = null) {
 }
 
 const checkOnly = process.argv.includes("--check");
+// Conformance environment (docs/07 §5). A part that declares npm_dependencies
+// (the OSS-wraps: auth.session, jobs.queue, …) is attested in an ISOLATED
+// workspace by default — only its declared deps + the runner, never the
+// monorepo's node_modules — so wrapped libraries never have to be root
+// devDependencies. Zero-dep parts stay on the in-repo path (their published
+// content is unchanged and their conformance test deps remain ambient).
+//   --isolated     force isolation even for a zero-dep part
+//   --in-repo      force the legacy monorepo path (local debugging)
+const inRepo = process.argv.includes("--in-repo");
+const forceIsolated = process.argv.includes("--isolated");
+const legacyPeerDeps = process.argv.includes("--legacy-peer-deps");
 const partName = arg("part");
 const version = arg("version");
 if (!partName || !version) {
@@ -97,89 +109,99 @@ for (const adapter of targets) {
   console.log(`\n── ${partName}@${version} · adapter: ${label}`);
   await materializePart(contentDir, adapter, workDir);
 
-  // 1. The strict-compile gate (docs/02 §4): src + adapters + examples must
-  // compile under the strictest mainstream tsconfig.
-  const gateFiles = [];
-  for (const sub of ["src", "adapters", "examples"]) {
-    gateFiles.push(...(await collectTs(path.join(workDir, sub))));
-  }
-  const tsc = spawnSync(
-    "npx",
-    [
-      "tsc", "--noEmit",
-      "--strict", "--exactOptionalPropertyTypes", "--noUncheckedIndexedAccess",
-      "--noImplicitOverride", "--noFallthroughCasesInSwitch",
-      // skipLibCheck is part of every strictest-mainstream tsconfig (@tsconfig/
-      // strictest, Next's default, and our own tsconfig.base.json): a part cannot
-      // fix bugs inside a dependency's shipped .d.ts, and no consumer type-checks
-      // them. Without it the gate type-checks better-auth's CryptoKey/bun:sqlite
-      // declarations and is stricter than anything real. It still fully checks
-      // the part's OWN .ts source. (First exposed by auth.session, the first
-      // OSS-wrapping part; the five zero-dep parts never reached a third-party .d.ts.)
-      "--skipLibCheck",
-      "--target", "es2023", "--lib", "es2023",
-      // Bundler resolution: parts are vendored TS consumed by the app's
-      // bundler (Next/Turbopack/Vite), so imports are extensionless — the
-      // shape every mainstream consumer resolves (issue #1: Turbopack has no
-      // .js→.ts extension alias and broke every fresh Next 16 repo).
-      "--module", "preserve", "--moduleResolution", "bundler",
-      "--types", "node",
-      ...gateFiles,
-    ],
-    { cwd: repoRoot, stdio: "inherit" },
-  );
-  if (tsc.status !== 0) {
-    console.error(`✖ strict-compile gate failed (${label})`);
-    process.exit(1);
-  }
-  console.log("  ✔ strict-compile gate");
+  const effectiveDeps = effectiveNpmDependencies(contract, adapter);
+  // Isolate when the part declares deps (or --isolated); --in-repo always wins.
+  const useIsolated = !inRepo && (forceIsolated || Object.keys(effectiveDeps).length > 0);
+  let passed;
+  let npmPins;
+  let resultBuf;
 
-  // 2. Conformance — the same suite for every adapter, against the
-  // materialized tree (adapters/selected/), exactly as a consumer gets it.
-  const resultsFile = path.join(workRoot, "results.json");
-  const vitest = spawnSync(
-    "npx",
-    [
-      "vitest", "run",
-      "--config", "vitest.conformance.config.ts",
-      "--reporter=default", "--reporter=json", `--outputFile=${resultsFile}`,
-    ],
-    { cwd: repoRoot, stdio: "inherit" },
-  );
-  if (vitest.status !== 0) {
-    console.error(`✖ conformance failed (${label})`);
-    process.exit(1);
-  }
-  const summary = JSON.parse(await readFile(resultsFile, "utf8"));
-  const passed = summary.numPassedTests ?? 0;
-  if (passed === 0) {
-    console.error("✖ conformance ran zero tests — refusing to attest nothing");
-    process.exit(1);
-  }
-  console.log(`  ✔ conformance: ${passed} tests passed`);
-
-  // 3. Issue the attestation over the materialized content hash. Declared
-  // npm dependencies are pinned at the exact version conformance ran against
-  // (RFC 0001 §2c) — if one is absent from the monorepo, conformance cannot
-  // have exercised it, so refuse to attest.
-  const npmPins = {};
-  for (const [dep, range] of Object.entries(effectiveNpmDependencies(contract, adapter))) {
-    let installed = null;
-    try {
-      installed =
-        JSON.parse(await readFile(path.join(repoRoot, "node_modules", dep, "package.json"), "utf8"))
-          .version ?? null;
-    } catch {
-      installed = null;
+  if (!useIsolated) {
+    // Legacy fast path (local debugging only): gate + conformance against the
+    // monorepo's node_modules. Never the attestation path in CI — see --in-repo.
+    const gateFiles = [];
+    for (const sub of ["src", "adapters", "examples"]) {
+      gateFiles.push(...(await collectTs(path.join(workDir, sub))));
     }
-    if (installed === null) {
-      console.error(
-        `✖ declared npm dependency ${dep}@${range} is not installed in the monorepo — refusing to attest what conformance never ran against`,
-      );
+    const tsc = spawnSync(
+      "npx",
+      [
+        "tsc", "--noEmit",
+        "--strict", "--exactOptionalPropertyTypes", "--noUncheckedIndexedAccess",
+        "--noImplicitOverride", "--noFallthroughCasesInSwitch",
+        "--skipLibCheck",
+        "--target", "es2023", "--lib", "es2023",
+        "--module", "preserve", "--moduleResolution", "bundler",
+        "--types", "node",
+        ...gateFiles,
+      ],
+      { cwd: repoRoot, stdio: "inherit" },
+    );
+    if (tsc.status !== 0) {
+      console.error(`✖ strict-compile gate failed (${label})`);
       process.exit(1);
     }
-    npmPins[`npm:${dep}`] = installed;
+    console.log("  ✔ strict-compile gate (in-repo)");
+
+    const resultsFile = path.join(workRoot, "results.json");
+    const vitest = spawnSync(
+      "npx",
+      [
+        "vitest", "run",
+        "--config", "vitest.conformance.config.ts",
+        "--reporter=default", "--reporter=json", `--outputFile=${resultsFile}`,
+      ],
+      { cwd: repoRoot, stdio: "inherit" },
+    );
+    if (vitest.status !== 0) {
+      console.error(`✖ conformance failed (${label})`);
+      process.exit(1);
+    }
+    passed = (JSON.parse(await readFile(resultsFile, "utf8")).numPassedTests) ?? 0;
+    if (passed === 0) {
+      console.error("✖ conformance ran zero tests — refusing to attest nothing");
+      process.exit(1);
+    }
+    resultBuf = await readFile(resultsFile);
+    npmPins = {};
+    for (const [dep, range] of Object.entries(effectiveDeps)) {
+      let installed = null;
+      try {
+        installed = JSON.parse(
+          await readFile(path.join(repoRoot, "node_modules", dep, "package.json"), "utf8"),
+        ).version ?? null;
+      } catch {
+        installed = null;
+      }
+      if (installed === null) {
+        console.error(`✖ declared npm dependency ${dep}@${range} is not installed in the monorepo`);
+        process.exit(1);
+      }
+      npmPins[`npm:${dep}`] = installed;
+    }
+    console.log(`  ✔ conformance: ${passed} tests passed`);
+  } else {
+    // Default: the honest isolated environment (docs/07 §5). Gate + conformance
+    // run in a throwaway workspace with ONLY the declared deps installed; the
+    // pins are the versions actually installed and tested there.
+    try {
+      const r = await runIsolatedConformance({
+        materializedDir: workDir,
+        effectiveDeps,
+        label,
+        installFlags: legacyPeerDeps ? ["--legacy-peer-deps"] : [],
+      });
+      passed = r.passed;
+      npmPins = r.pins;
+      resultBuf = r.resultBuf;
+      const depList = r.workspaceDeps.length ? r.workspaceDeps.join(", ") : "none (zero-dep part)";
+      console.log(`  ✔ isolated conformance: ${passed} tests passed · deps: ${depList}`);
+    } catch (e) {
+      console.error(`✖ ${e instanceof Error ? e.message : String(e)}`);
+      process.exit(1);
+    }
   }
+
   const contentHash = await hashPartDir(workDir);
   issued.push({
     adapter,
@@ -192,7 +214,7 @@ for (const adapter of targets) {
       dependency_matrix: { node: process.versions.node, ...npmPins },
       conformance_run: conformanceRun,
       tests_passed: passed,
-      result_hash: `sha256:${createHash("sha256").update(await readFile(resultsFile)).digest("hex")}`,
+      result_hash: `sha256:${createHash("sha256").update(resultBuf).digest("hex")}`,
       signature: "dev:unsigned",
       expires: new Date(Date.now() + expiresDays * 86_400_000).toISOString(),
     },

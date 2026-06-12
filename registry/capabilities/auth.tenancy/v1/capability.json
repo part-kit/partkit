@@ -1,0 +1,28 @@
+{
+  "capability": "auth.tenancy",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Organizations, memberships, and roles with a row-level-scoping authorization gate, over part-owned Postgres tables, through a contract-stable interface and a driver-free SqlExecutor seam.",
+  "interface": {
+    "exports": [
+      "tenancy(db: SqlExecutor): Tenancy",
+      "Tenancy { createOrganization(input): Promise<Organization>; getOrganization(id): Promise<Organization | null>; deleteOrganization(id): Promise<void>; addMember(input): Promise<Membership>; setRole(input): Promise<Membership>; removeMember(input): Promise<void>; getMembership(input): Promise<Membership | null>; requireMembership(input): Promise<Membership>; listMembers(organizationId): Promise<Membership[]>; organizationsForUser(userId): Promise<Membership[]> }",
+      "class TenancyError extends Error { code: TenancyErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; every failure — invalid input or a storage error from the executor — surfaces as a typed TenancyError, and the raw driver error (which may carry credentials) never appears in the message",
+    "Invalid input — a blank organization name, an empty user id, or an unknown role — fails fast with a typed TenancyError('invalid_input') and issues zero SQL",
+    "createOrganization creates the organization and its owner membership in one atomic statement, so an organization is never ownerless; the returned organization is immediately readable and its creator is a member with role 'owner'",
+    "Membership is unique per (organization, user): addMember rejects a duplicate with TenancyError('already_member') and never writes a second row, and rejects a member of a non-existent organization with TenancyError('not_found')",
+    "requireMembership returns the membership of a user who belongs to the organization and throws TenancyError('forbidden') for a non-member — a non-member can never obtain a membership/scope for an organization they are not in (the row-level-scoping gate); a missing organization and a non-membership are indistinguishable to the caller (no enumeration)",
+    "Roles are ordered owner > admin > member; requireMembership({ role }) admits a caller whose role meets or exceeds the required role and rejects an under-privileged caller with TenancyError('forbidden')",
+    "An organization always retains at least one owner: removeMember and setRole refuse to remove or demote the last remaining owner (TenancyError('last_owner')) and leave the membership unchanged",
+    "organizationsForUser returns exactly the organizations the user is a member of (with their role) and listMembers returns exactly the members of the given organization — neither read crosses the tenant boundary",
+    "deleteOrganization removes the organization and cascades its memberships, leaving no membership for that organization",
+    "The part owns only the auth_tenant_* tables and never the principal: user identity is referenced by an opaque user_id with no foreign key to any auth.session table; every statement is fully parameterized so SQL metacharacters in names and ids are stored literally and never executed; and every statement targets only auth_tenant_organization / auth_tenant_membership"
+  ],
+  "notes": "Second auth capability, built after auth.session and the row-level scoping primitive agents get wrong most expensively. It references auth.session's principal by opaque user_id and does NOT duplicate or foreign-key the user table — the cross-part boundary is preserved in the database, and the principal flows in from getSession at the app's seam. Like audit.log the connection is an app-provided SqlExecutor seam (not env or a vendored driver), so the part ships zero adapters and zero env, owns auth_tenant_organization + auth_tenant_membership, and runs on the app's connection/transaction. Compound operations (create-org-with-owner, last-owner-guarded remove/demote, member-of-existing-org) are expressed as single data-modifying CTE statements so they are atomic even when the seam hands in a pooled connection rather than an explicit transaction. requireMembership is the authorization gate: obtaining a scope IS the membership check, and it is enumeration-safe (forbidden whether the org is missing or the user is simply not a member). Conformance runs against real Postgres (gated on PARTKIT_TEST_DATABASE_URL); the input-validation, typed-error, and own-tables-shape invariants also run DB-free. The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

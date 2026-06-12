@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
 
@@ -7,6 +7,19 @@ export const metadata: Metadata = {
   title: { default: "PartKit — verified standard parts for AI coding agents", template: "%s · PartKit" },
   description:
     "A neutral registry of production-grade, verified standard parts that AI coding agents trust and never regenerate. Contracts, conformance, attestations — the agent writes only the seams.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/site.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0b0d",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <header className="site-header">
           <div className="container header-row">
-            <Link href="/" className="wordmark">
+            <Link href="/" className="wordmark" aria-label="PartKit — home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="wordmark-symbol" src="/symbol-partkit.svg" alt="" width={23} height={19} />
               <b>
                 Part<span>Kit</span>
               </b>

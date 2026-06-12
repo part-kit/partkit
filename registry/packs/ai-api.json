@@ -1,0 +1,23 @@
+{
+  "pack": "ai-api",
+  "title": "AI app / API product",
+  "summary": "A programmatic product: API keys instead of (or alongside) human login, metered usage billing, per-key rate limits, async generation jobs, artifact storage, an audit trail, and signed outbound webhooks to customers. The dominant 2026 vibecoding archetype and the one the core ten could not assemble.",
+  "capabilities": [
+    "auth.session",
+    "auth.apikey",
+    "billing.usage",
+    "ratelimit.api",
+    "jobs.queue",
+    "storage.upload",
+    "audit.log",
+    "webhooks.dispatch",
+    "email.transactional"
+  ],
+  "distinctive": ["auth.apikey", "billing.usage", "webhooks.dispatch"],
+  "seams_the_agent_writes": [
+    "the API surface / model-call handlers",
+    "developer dashboard (key management UI from auth.apikey examples/)",
+    "usage/pricing page",
+    "customer webhook-endpoint settings UI"
+  ]
+}

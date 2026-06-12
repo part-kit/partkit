@@ -3,13 +3,13 @@
   "version": "1.0.1",
   "adapter": "postmark",
   "content_hash": "sha256:d47d9504f515af6b77f1c245ed7d96f5088a115392c1ffb4935b2bf148c8ff5f",
-  "verified_at": "2026-06-12T07:41:57.186Z",
+  "verified_at": "2026-06-12T05:47:49.182Z",
   "dependency_matrix": {
     "node": "22.22.3"
   },
-  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401979989",
+  "conformance_run": "https://github.com/radosukala/partkit/actions/runs/27397258191",
   "tests_passed": 10,
-  "result_hash": "sha256:b5bb22f78dee159dffd4c95940eee3d82c43049417e461220fa6f5d5d18a9742",
+  "result_hash": "sha256:e7051d0c12479d581402caf618265f341e440adc7a078f6f718ec9abf8e8b2e8",
   "signature": "dev:unsigned",
-  "expires": "2026-06-26T07:41:57.186Z"
+  "expires": "2026-06-26T05:47:49.182Z"
 }

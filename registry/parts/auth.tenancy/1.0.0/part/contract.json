@@ -1,0 +1,49 @@
+{
+  "part": "auth.tenancy",
+  "version": "1.0.0",
+  "contract_version": "0.1",
+  "provides": [
+    "auth.tenancy@1"
+  ],
+  "requires": [
+    "auth.session>=1"
+  ],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "tenancy(db: SqlExecutor): Tenancy",
+      "Tenancy { createOrganization(input: CreateOrganizationInput): Promise<Organization>; getOrganization(organizationId: string): Promise<Organization | null>; deleteOrganization(organizationId: string): Promise<void>; addMember(input: AddMemberInput): Promise<Membership>; setRole(input: SetRoleInput): Promise<Membership>; removeMember(input: MembershipRef): Promise<void>; getMembership(input: MembershipRef): Promise<Membership | null>; requireMembership(input: RequireMembershipInput): Promise<Membership>; listMembers(organizationId: string): Promise<Membership[]>; organizationsForUser(userId: string): Promise<Membership[]> }",
+      "class TenancyError extends Error { code: TenancyErrorCode }",
+      "types: SqlExecutor, Role, Organization, Membership, CreateOrganizationInput, AddMemberInput, SetRoleInput, MembershipRef, RequireMembershipInput, Tenancy, TenancyErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {},
+  "data_ownership": {
+    "tables": [
+      "auth_tenant_organization",
+      "auth_tenant_membership"
+    ],
+    "writes_only_own_tables": true
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; every failure — invalid input or a storage error from the executor — surfaces as a typed TenancyError, and the raw driver error (which may carry credentials) never appears in the message",
+    "Invalid input — a blank organization name, an empty user id, or an unknown role — fails fast with a typed TenancyError('invalid_input') and issues zero SQL",
+    "createOrganization creates the organization and its owner membership in one atomic statement, so an organization is never ownerless; the returned organization is immediately readable and its creator is a member with role 'owner'",
+    "Membership is unique per (organization, user): addMember rejects a duplicate with TenancyError('already_member') and never writes a second row, and rejects a member of a non-existent organization with TenancyError('not_found')",
+    "requireMembership returns the membership of a user who belongs to the organization and throws TenancyError('forbidden') for a non-member — a non-member can never obtain a membership/scope for an organization they are not in (the row-level-scoping gate); a missing organization and a non-membership are indistinguishable to the caller (no enumeration)",
+    "Roles are ordered owner > admin > member; requireMembership({ role }) admits a caller whose role meets or exceeds the required role and rejects an under-privileged caller with TenancyError('forbidden')",
+    "An organization always retains at least one owner: removeMember and setRole refuse to remove or demote the last remaining owner (TenancyError('last_owner')) and leave the membership unchanged",
+    "organizationsForUser returns exactly the organizations the user is a member of (with their role) and listMembers returns exactly the members of the given organization — neither read crosses the tenant boundary",
+    "deleteOrganization removes the organization and cascades its memberships, leaving no membership for that organization",
+    "The part owns only the auth_tenant_* tables and never the principal: user identity is referenced by an opaque user_id with no foreign key to any auth.session table; every statement is fully parameterized so SQL metacharacters in names and ids are stored literally and never executed; and every statement targets only auth_tenant_organization / auth_tenant_membership"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

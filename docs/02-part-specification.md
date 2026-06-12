@@ -89,7 +89,9 @@ Design rules for contracts — each one is load-bearing:
 
 ## 3. Capabilities are first-class
 
-The namespace is flat, two-level, boring on purpose: `auth.session`, `auth.tenancy`, `billing.subscription`, `billing.usage`, `email.transactional`, `storage.upload`, `jobs.queue`, `jobs.cron`, `audit.log`, `flags.feature`, `admin.crud`, `webhooks.ingest`, `search.fulltext`, `ratelimit.api`.
+The namespace is flat, two-level, boring on purpose: `auth.session`, `auth.apikey`, `auth.tenancy`, `billing.subscription`, `billing.usage`, `email.transactional`, `storage.upload`, `jobs.queue`, `jobs.cron`, `audit.log`, `flags.feature`, `admin.crud`, `webhooks.ingest`, `webhooks.dispatch`, `search.fulltext`, `ratelimit.api`.
+
+`auth.apikey` (programmatic key auth — issue/rotate/scope/verify) and `webhooks.dispatch` (outbound signed webhooks with retry + delivery log) were added to the namespace by RFC 0002 and RFC 0003 to make the AI-app / API-product skeleton assemblable from verified parts; see `docs/rfcs/`. They are the API-facing siblings of `auth.session` and `webhooks.ingest`.
 
 A capability is a **versioned spec, not just a name**. Each namespace entry owns: the interface definition (the exports, events, and route shapes any implementing part must provide), the invariants, and the conformance suite (§4). Parts *implement* `billing.subscription@1`; `requires: auth.session>=1` therefore means something definite independent of which part satisfies it — two parts claiming the same capability version are interchangeable by construction, because they pass the same suite against the same interface. In v0, with one part per capability, the distinction is invisible; it becomes load-bearing the day a second provider appears, and it is what vendor certification certifies against (a vendor's adapter conforms to the *capability*, not to our part).
 

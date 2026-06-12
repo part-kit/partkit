@@ -55,6 +55,22 @@ before you write anything. If it is not, fixing that is your first task.
    can't, the part has failed conformance in spirit (docs/02 §8).
 8. **`examples/` compiles in place** (relative imports, adjusted by the user
    after copying) and is explicitly outside the boundary.
+9. **Portable and composable — the "deployed anywhere, by a whole team"
+   bar.** Two obligations that make a part trustworthy as shared
+   infrastructure, not just correct in isolation:
+   - *Portability.* A part may never **require** a specific managed vendor to
+     function. Durable state lives in part-owned Postgres tables; the part runs
+     on plain Node + Postgres a company can self-host. Managed services
+     (Redis, S3, a vendor API) enter only as an app-provided *seam* or an
+     interchangeable adapter — never as a hard dependency baked into `src/`.
+     (`ratelimit.api`'s store seam and `storage.upload`'s any-S3 stance are the
+     precedents.)
+   - *Composition.* When a part is designed to work with another (a queue
+     draining a dispatcher, an audit trail recording another part's events),
+     `seams.md` must document the composition seam explicitly and `examples/`
+     must show it wired. A part that composes only in theory has not earned the
+     claim. The skeletons in §4 are assembled out of exactly these seams — they
+     must exist for the library to feel like one app rather than ten utilities.
 
 ## 2. Layout rules (mechanical, enforced by tooling)
 
@@ -76,6 +92,14 @@ before you write anything. If it is not, fixing that is your first task.
 - `migrations/` exists even when empty (`.gitkeep`). Parts that own tables
   ship `migrations/NNN-description.sql`, forward-only from `001`, applied by
   `partkit migrate` (docs/02 §6).
+- **Test-only deps go in `conformance/package.json`**, never in `npm_dependencies`.
+  If the conformance suite needs a package the part itself does not (a DB part
+  whose conformance opens a real `pg` connection, say — the part uses the
+  SqlExecutor seam and has zero runtime deps), declare it there as a
+  `devDependency`. The isolated harness installs it as test toolchain and never
+  pins it in the attestation (runtime deps only — RFC 0001). Add it from the
+  part's FIRST version: `conformance/` is part of the content hash, so it cannot
+  appear in a later patch without changing an immutable version's hash.
 - Relative imports are **extensionless** (`./internal/errors`). Parts are
   vendored TS consumed by the app's bundler — extensionless is the one shape
   Next (Turbopack and webpack), Vite, and tsc's bundler resolution all agree
@@ -118,25 +142,64 @@ Work on a branch. One part per session.
     building, update the doc in the same commit and say so in the commit body.
     Never silently drift.
 
-## 4. Priority queue
+## 4. What to build — the four skeletons and the build order
 
-Build in this order. Do not skip ahead past an unbuilt infrastructure
-prerequisite — flag it instead (§5). The finish line for this queue is the
-**demo set** (docs/05 §2b): all ten parts attested and the "acme" demo app
-assembled from them with the agent writing only seams.
+The library exists to **assemble whole-app skeletons** — verified
+infrastructure a team standardizes on, deployable into their own infra, where
+the agent writes only the product seams. Each skeleton is an **App Pack**
+(`registry/packs/<name>.json`, the canonical capability list; resolvable via
+`partkit plan --pack <name>`). The same parts recombine across packs — that
+reuse is the proof the library compounds.
+
+| Pack | Skeleton | Distinctive parts beyond the shared core |
+|---|---|---|
+| `saas` | Team SaaS (the reference; the acme demo) | `auth.tenancy`, `billing.subscription`, `admin.crud` |
+| `ai-api` | AI app / API product | `auth.apikey`, `billing.usage`, `webhooks.dispatch` |
+| `marketplace` | Content / marketplace | `search.fulltext`, `flags.feature` |
+| `backoffice` | Internal tool / back office | `admin.crud` (else all shared) |
+
+Shared core across packs: `auth.session`, `storage.upload`, `audit.log`,
+`ratelimit.api`, `email.transactional`, `jobs.queue`, `webhooks.ingest`.
+
+Build in order. Do not skip past an unbuilt infrastructure prerequisite — flag
+it instead (§5). **Wave 1 finishes the `saas` skeleton (the acme demo,
+docs/05 §2b); Wave 2 unlocks the other three packs.** Wave 2 is *sequenced
+after* Wave 1, not parallel to it — "ten excellent before any shallow" still
+governs; each Wave-2 part meets the identical bar (§1, §7).
+
+### Wave 1 — finish the core ten (the `saas` skeleton)
+
+Shipped, and now the **reference patterns** to copy:
+
+- ✅ `email.transactional` 1.0.0 — the exemplar; zero-dep vendor-REST adapters (resend + postmark); the vendor-flip demo.
+- ✅ `webhooks.ingest` 1.0.0 — adapters are signature *schemes* not vendors (stripe + standardwebhooks); the protocol-faithful fake-vendor pattern.
+- ✅ `ratelimit.api` 1.0.0 — first **zero-adapter, zero-env** part; pluggable backend as an app *seam*, single `default` attestation.
+- ✅ `audit.log` 1.0.0 — first DB part; the **DB-conformance pattern** (real-PG invariants gated on `PARTKIT_TEST_DATABASE_URL`, validation/typed-error invariants DB-free) reused by every DB part below; DB-enforced append-only.
+- ✅ `storage.upload` 1.0.0 — zero-dep, no-adapter (one S3 wire format, provider = config); offline conformance via AWS-CLI known-answer vectors; the **portability** precedent (any S3-compatible host, self-hostable MinIO).
+- ✅ `auth.session` 1.0.0 — first **OSS-wrapping part** (Better Auth; `npm_dependencies`, contract_version 0.2); migration derived from the library's own schema generator. The pattern for every wrapped part.
+- ✅ `auth.tenancy` 1.0.0 — orgs/memberships/roles + the **row-level-scoping gate** (`requireMembership`, enumeration-safe); first part with a **`requires` edge** (`auth.session>=1`) — references the principal by opaque `user_id` with **no FK** to `auth_user` (cross-part boundary kept in the DB). Never-ownerless and last-owner rules enforced in single-statement **CTEs** (atomic through a pooled `SqlExecutor`); zero-adapter/zero-env DB part. 13 conformance tests.
+
+Remaining, in this order:
 
 | # | Part | Guidance | Blocked on |
 |---|---|---|---|
-| 1 | ✅ `email.transactional` 1.0.0 | The exemplar (resend + postmark; SES later, needs SigV4 + real sandbox) | — |
-| 2 | ✅ `webhooks.ingest` 1.0.0 | Shipped as specified (stripe + standardwebhooks; adapters are signature schemes, not vendors — GitHub's timestamp-less scheme needs a capability RFC first) | — |
-| 3 | ✅ `ratelimit.api` 1.0.0 | Shipped as specified (in-memory fixed-window store + typed pluggable-store seam for Redis; zero deps). First **zero-adapter, zero-env** part — the store is an app seam, not a vendored adapter; publishes a `default` attestation. | — |
-| 4 | ✅ `audit.log` 1.0.0 | Shipped — the first DB part. Owns `audit_events`, ships `migrations/001-*.sql`, append-only enforced in the DB (UPDATE/DELETE/TRUNCATE triggers). Driver-free `SqlExecutor` seam (zero adapters/env). **DB-conformance pattern for #5/#9**: persistence invariants run against a real database gated on `PARTKIT_TEST_DATABASE_URL` (publish with it set for a meaningful attestation), validation/typed-error invariants run DB-free so the suite still attests where no DB exists. | — |
-| 5 | ✅ `storage.upload` 1.0.0 | Shipped — in-part SigV4 presigning (PUT upload + GET download), zero deps, no adapters (one S3 wire format; provider = config). Presigning is pure computation, so conformance is fully offline: **known-answer vectors captured from the AWS CLI (botocore)** anchor signatures byte-for-byte; the PUT path (CLI presigns GET only) is checked against an independent in-suite reimplementation. The optional real-MinIO round-trip is gated on `STORAGE_TEST_ENDPOINT` (none in CI yet). Image variants + POST-policy limits are roadmap. | — |
-| 6 | ✅ `auth.session` 1.0.0 | Shipped — the **first OSS-wrapping part** (wraps Better Auth; `better-auth` + `pg` in `npm_dependencies`, contract_version 0.2). Pattern for future wrapped parts: derive the migration from the library's own schema generator; map tables to the part prefix via the library's modelName config; conformance runs the real library + real Postgres. v1 email/password + sessions + guards; OAuth → 1.1 (providers as seams). The strict gate's `--skipLibCheck` (added 5feb411) is what lets a part import a real OSS lib's `.d.ts`. | — |
-| 7 | `jobs.queue` | Wraps graphile-worker via `npm_dependencies`; ships both worker shapes (server daemon + serverless cron-drain) behind one contract (docs/05 §1). | — |
-| 8 | `auth.tenancy` | After auth.session; row-level scoping patterns. | auth.session |
-| 9 | `billing.subscription` | The flagship. Hardest conformance (replay, ordering, checkout/webhook races — docs/02 §4). Stripe test-mode keys are a **human checkpoint**. | webhooks.ingest, auth.session |
-| 10 | `admin.crud` | Schema-driven admin for part-owned tables. Needs a data-ownership "reads" story — small spec RFC first. | several above |
+| 7 | `jobs.queue` | Wraps graphile-worker via `npm_dependencies` (the `auth.session` OSS-wrap pattern; needs the isolated-conformance harness, §5). Ships both worker shapes behind one contract — server daemon + serverless cron-drain (docs/05 §1) — and **provides both `jobs.queue@1` and `jobs.cron@1`** (one part, two capabilities; graphile-worker does both). The retry/backoff/dead-letter engine that `webhooks.dispatch` (#12) composes on. | — |
+| 9 | `billing.subscription` | The flagship. Hardest conformance (replay, ordering, checkout/webhook races — docs/02 §4). **Composes on `webhooks.ingest`** for inbound verification — document and wire that seam (don't re-implement signature checking). Stripe test-mode keys are a **human checkpoint**. | webhooks.ingest, auth.session |
+| 10 | `admin.crud` | Schema-driven admin over part-owned tables. Needs a data-ownership "reads" story — **small spec RFC first** (RFC 0004; how a part exposes its tables for read/admin without breaking the boundary). The `backoffice` pack's distinctive part. | data-ownership RFC; several above |
+
+### Wave 2 — unlock the other three skeletons
+
+Same bar, sequenced after Wave 1. Two new capabilities were added to the
+namespace for the `ai-api` pack (RFC 0002, 0003 — already accepted); the rest
+were already in the namespace, unbuilt.
+
+| # | Part | Pack | Guidance | Blocked on |
+|---|---|---|---|---|
+| 11 | `auth.apikey` | ai-api | **New capability — RFC 0002 (read it first).** Programmatic key auth: issue/verify/rotate/revoke, hash-at-rest, constant-time verify, scopes. Prefer zero-dep (Node `crypto`). DB part (audit.log pattern). The API-facing sibling of `auth.session`. | auth.session |
+| 12 | `webhooks.dispatch` | ai-api | **New capability — RFC 0003 (read it first).** Outbound signed webhooks: out-of-band delivery, capped-backoff retry, dead-letter, delivery log, **SSRF defense**. Reuses `webhooks.ingest`'s Standard-Webhooks signing (factor the shared scheme). **Composes on `jobs.queue` (delivery worker) and `audit.log` (attempt log)** — wire both seams. | jobs.queue, audit.log |
+| 13 | `billing.usage` | ai-api | Metered/usage-based billing — the AI/API monetization backbone. Records usage events, aggregates per period, reports to the billing vendor. Shares Stripe plumbing with `billing.subscription`; the metering key is typically the `auth.apikey` id (document that seam). Stripe keys = **human checkpoint**. | billing.subscription, auth.apikey |
+| 14 | `flags.feature` | marketplace, backoffice | Feature flags / kill switches / gradual rollout. DB-backed, evaluated in-process (no per-check network); deterministic bucketing for percentage rollouts. Low dependency — good Wave-2 opener. | — |
+| 15 | `search.fulltext` | marketplace | Full-text search over app-declared content, Postgres-native (`tsvector`/`tsquery`/GIN) — portable, no external search service required. Owns its index tables + `partkit migrate` triggers to keep them current. | — |
 
 ## 5. Infrastructure queue (separate sessions, not part work)
 
@@ -156,6 +219,31 @@ own session — or flag it to the human and pick the next unblocked part:
 - ✅ MCP server + resolver — shipped 2026-06-11 (`@part-kit/mcp`, six tools
   over stdio; resolver in `packages/core/src/ops/resolve.ts`; shapes per
   `docs/06-agent-walkthrough.md` step 2)
+- ✅ **Isolated-conformance harness** — shipped 2026-06-12
+  (`scripts/conformance-harness.mjs`). A part that declares `npm_dependencies`
+  (the OSS-wraps: `auth.session`, `jobs.queue`, …) is now attested in a
+  throwaway workspace containing ONLY its declared deps + the runner — never the
+  monorepo's `node_modules`. So **wrapped libraries no longer have to be root
+  devDependencies** (the thing that did not scale to many libraries with
+  conflicting peers), and a part cannot pass by leaning on a package that merely
+  happens to be in the monorepo. `registry:publish` selects the path
+  automatically: isolated when the part declares deps, in-repo for zero-dep
+  parts (so the published zero-dep parts are untouched); `--isolated` /
+  `--in-repo` override. Two dependency facets the harness handles, neither
+  pinned in the attestation matrix (runtime deps only, RFC 0001): **untyped
+  runtime deps** get their `@types/*` installed as build toolchain for the gate
+  (pg → @types/pg), falling back to an opaque `declare module` when no `@types`
+  exists; **test-only deps** (a DB part's `pg` driver used only by conformance
+  to reach a real database) are declared in `conformance/package.json` and
+  installed as test toolchain. Because `conformance/` is part of the content
+  hash, that file can only be added in a NEW version — author it from a part's
+  first version. jobs.queue is unblocked: graphile-worker is a runtime dep, so
+  it auto-isolates and never touches root devDeps.
+- **Pack definitions + `partkit plan --pack <name>`** — `registry/packs/*.json`
+  exist (the four skeletons, §4); wire `plan`/resolver to accept `--pack` so an
+  agent can scaffold a whole skeleton in one call. Small, high-leverage.
+- **RFC 0004 — data-ownership "reads"** — before `admin.crud` (#10): how a part
+  exposes its owned tables for read/admin without breaking the import boundary.
 - Sigstore signing (replaces `dev:unsigned`; `verify` already fails closed on
   `sigstore:` until real verification exists — keep it that way)
 
@@ -177,7 +265,33 @@ own session — or flag it to the human and pick the next unblocked part:
 - [ ] Consumer e2e test (init → add → verify) added and green
 - [ ] `seams.md` sufficient without reading `src/`; `examples/` compiles in place
 - [ ] SPEC.md has design decisions, invariant mapping, threat model, roadmap
+- [ ] **Portable** (§1.9): no required managed vendor; runs on plain Node + Postgres
+- [ ] **Composition seams** (§1.9): where the part is designed to compose, `seams.md` documents it and `examples/` wires it
 - [ ] `npm run check` green; docs updated where reality diverged; one commit
+
+## 8. Definition of done, per skeleton (the "done well" bar)
+
+A part is correct in isolation; a *skeleton* is the thing a team adopts. When a
+pack's parts are all attested, the skeleton is demonstrated **done well** only
+when an assembled app proves all four — these are the moat, made visible:
+
+- [ ] **Robust, no holes** — the security exhibits are live and observable: the
+      `429` trips, the tampered/replayed webhook is rejected, the unscoped API
+      key is refused, the audit trail cannot be rewritten. Not asserted in a
+      test file — shown in the running app.
+- [ ] **Maintained** — the upgrade and vendor-flip are demonstrated, not just
+      possible: a one-command `partkit upgrade` and an adapter flip
+      (`--adapter`) land as small diffs with seam-changes surfaced.
+- [ ] **Deployable in the team's own infra** — the skeleton boots on
+      self-hosted Node + Postgres (no required managed vendor); env is fully
+      scaffolded; `partkit migrate` brings up every owned table from clean.
+- [ ] **A team standard, enforced** — the boundary guard provably stops a
+      *second* implementation: a teammate (or their agent) cannot hand-roll the
+      capability past `partkit guard` / CI. "Everyone uses the verified part"
+      is mechanized, not hoped for. Show the guard rejecting the shortcut.
+
+The `saas` pack (the acme demo, docs/05 §2b) is the first skeleton held to this
+bar; `ai-api` is the second. Build *order* is §4; this is the finish line.
 
 ---
 
@@ -191,14 +305,20 @@ every file of the exemplar part at registry/parts/email.transactional/1.0.0/,
 and AGENTS.md. Run `npm install && npm run check` and confirm green before
 writing anything.
 
-Then build the next unbuilt part from the manual's Priority queue (§4),
-following the process in §3 exactly: capability spec → contract → conformance
+Then build the next unbuilt part from the manual's build order (§4) — Wave 1
+before Wave 2. If it is a new-capability part, read its RFC first (docs/rfcs/).
+Follow the process in §3 exactly: capability spec → contract → conformance
 tests FIRST → implementation → seams.md / examples / SPEC.md →
 `npm run registry:publish` → consumer e2e test → `npm run check` → one commit.
 
-One part per session. Stop and ask at every Human checkpoint (§6). Never
-weaken the core schemas, the strict tsconfig, severity tiers, or the boundary
-rules. If reality and the docs disagree, reconcile both explicitly in the same
-commit. Your final message must list: what shipped, conformance results per
-adapter, and anything you flagged for a human.
+Every part must be **portable** (no required managed vendor; runs on plain
+Node + Postgres) and must document + wire its **composition seams** (§1.9) —
+the parts assemble into the four skeletons in §4, so those seams must be real.
+
+One part per session. Stop and ask at every Human checkpoint (§6) — including
+adding any capability not already in the docs/02 §3 namespace. Never weaken the
+core schemas, the strict tsconfig, severity tiers, or the boundary rules. If
+reality and the docs disagree, reconcile both explicitly in the same commit.
+Your final message must list: what shipped, conformance results per adapter,
+which skeleton(s) the part advances, and anything you flagged for a human.
 ```

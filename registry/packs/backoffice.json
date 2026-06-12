@@ -1,0 +1,18 @@
+{
+  "pack": "backoffice",
+  "title": "Internal tool / back office",
+  "summary": "An internal line-of-business tool: staff sign-in, schema-driven CRUD over owned tables, an append-only audit trail of who-did-what, file attachments, and feature flags for staged access. Assembles almost entirely from parts the other skeletons already use — the proof that the library compounds.",
+  "capabilities": [
+    "auth.session",
+    "admin.crud",
+    "audit.log",
+    "storage.upload",
+    "flags.feature"
+  ],
+  "distinctive": ["admin.crud"],
+  "seams_the_agent_writes": [
+    "the domain tables + their CRUD config",
+    "staff role mapping",
+    "the few custom views the generated admin doesn't cover"
+  ]
+}

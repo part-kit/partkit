@@ -1,0 +1,80 @@
+{
+  "manifest_version": 1,
+  "part": "auth.tenancy",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "1c0169b39cb25d6a7c094197e44213bbcf6c11f7dacab8afff6a2d24ea3b48c4",
+      "bytes": 10039
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "d14acf3b2e19f7e7e9b0729459da4508049fd538221292f51e17b8f5c0011734",
+      "bytes": 1096
+    },
+    {
+      "path": "conformance/tenancy.test.ts",
+      "sha256": "ce7b0830665b16d71821508a2e215e7768378ede76185da5608a122332faabae",
+      "bytes": 17291
+    },
+    {
+      "path": "contract.json",
+      "sha256": "3cd95c104c286e4b3fc269e9b0c7a6c2dafe067561ae65083d6c9b150c0e0b96",
+      "bytes": 3922
+    },
+    {
+      "path": "examples/manage-org.ts",
+      "sha256": "469d5fc2810fd29db1571e3308d59e47a9dc8953b5fcf2dd3f33f970544f135c",
+      "bytes": 1595
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "b645bf37888153698a47c1a52d776455c7391339f2ca2bdf6db196ea2242290c",
+      "bytes": 1113
+    },
+    {
+      "path": "examples/scoped-route.ts",
+      "sha256": "7333e4616b23599b7dd1e80995c6e4a7b20e0f3ea365a717f83feb1d3b406453",
+      "bytes": 2577
+    },
+    {
+      "path": "migrations/001-create-tenant-tables.sql",
+      "sha256": "2a2e3d52162c0e0dd7dc77831180347eeafb5db3f5f260f6f1a70d791c7eaae7",
+      "bytes": 2393
+    },
+    {
+      "path": "seams.md",
+      "sha256": "30a32028197bb3bd5e5059e1824879c506d725df2748e4870e8ee14649e08ce7",
+      "bytes": 5802
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "d1249ff9952a8531ee8447112a2e8992e801ac15f56473597b81a8a9b001fb3d",
+      "bytes": 8518
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "e6efbaf962bb7e412efad7d1dcd6a2f28cf8d0a973d39b1ee67affac28f9a7a6",
+      "bytes": 944
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "5ee32d708f0eb8e5600e09de33c347bf9ffad69331bdb110e488163bc990aa27",
+      "bytes": 6456
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "8826b671747d72a980c4fc5faf5be62e22a8d9bbf2145eefb255d44c09b41c7d",
+      "bytes": 3825
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "7067ed826b6afc53b8476bd0a507aa33ee13afec023cea7d4dd89df2683e8c16",
+      "bytes": 1894
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

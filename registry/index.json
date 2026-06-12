@@ -59,6 +59,15 @@
       "provides": [
         "auth.session@1"
       ]
+    },
+    "auth.tenancy": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "auth.tenancy@1"
+      ]
     }
   }
 }

@@ -15,7 +15,7 @@ Authorship rule (revised 2026-06-11): parts are authored directly against best, 
 1. **email.transactional** — send + templates + delivery events. Built first: smallest contract and best first conformance suite, so it proved the entire toolchain (contract → conformance → attestation → CLI) on the cheapest part before the expensive ones. *Shipped 1.0.0 (2026-06-11): resend + postmark attested, 10 conformance tests each; delivery events arrive as an additive minor via `webhooks.ingest`; SES follows once SigV4 + real-sandbox conformance exists. The vendor-flip demo lives here.*
 2. **auth.session** — email + OAuth sign-in, sessions, middleware guards; wraps Better Auth behind the contract. The part everything else requires. *Shipped 1.0.0 (2026-06-11), sixth in actual build order (human-checkpoint cleared): **first OSS-wrapping part** — wraps Better Auth, declaring `better-auth` + `pg` in `npm_dependencies` (RFC 0001, contract_version 0.2). v1 is email/password + sessions + guards (`authHandler` catch-all mount, `getSession`/`requireSession`, server-side `signUp`/`signIn`/`signOut`); OAuth is an additive 1.1 (providers as seams, not adapters). Owns `auth_*` tables via Better Auth's modelName mapping, created by `partkit migrate` (migration generated from Better Auth's own schema generator). Zero registry adapters. 7 conformance tests against real Better Auth + real Postgres: password hashed (scrypt, never plaintext), no account enumeration, session invalidation. Node-runtime only (pg, not Edge).*
 3. **billing.subscription** — checkout, webhooks, plan state, cancel/upgrade. Hardest conformance (replay, ordering, races); the flagship attestation. v1 verifies its own inbound webhooks; may compose on `webhooks.ingest` from v2.
-4. **auth.tenancy** — organizations, memberships, roles, row-level scoping. The part agents get wrong most expensively.
+4. **auth.tenancy** — organizations, memberships, roles, row-level scoping. The part agents get wrong most expensively. *Shipped 1.0.0 (2026-06-12), seventh in actual build order (after `auth.session`): zero-adapter/zero-env DB part on the `SqlExecutor` seam, owns `auth_tenant_organization` + `auth_tenant_membership`. `requireMembership` is the row-level-scoping gate (enumeration-safe: a missing org and a non-membership are indistinguishable); roles are ordered owner>admin>member. **First part to declare `requires`** (`auth.session>=1`) — it references the principal by opaque `user_id` with NO foreign key to `auth_user`, keeping the cross-part boundary in the database. Never-ownerless (create-org-with-owner is atomic) and last-owner protection are enforced in single-statement CTEs through a pooled connection; the simultaneous-double-demote race is a documented residual (needs SERIALIZABLE). 13 conformance tests — orgs/memberships/roles/last-owner/cascade/injection against real Postgres (gated on `PARTKIT_TEST_DATABASE_URL`), validation/typed-error/own-tables-and-no-cross-part-FK DB-free.*
 5. **storage.upload** — signed uploads, image variants. *Shipped 1.0.0 (2026-06-11), fifth in actual build order (zero deps, unblocked): in-part AWS SigV4 presigning of direct-to-storage PUT uploads and GET downloads for any S3-compatible provider (S3/R2/MinIO/B2/Spaces) — one wire format, so **no adapters** (provider = config: endpoint/region/path-style). Presigning is pure computation (zero network), so conformance is fully offline: signatures are anchored byte-for-byte to the AWS CLI (botocore) via known-answer vectors across path-style/virtual-hosted/ports/regions/unicode keys, the PUT path verified against an independent reimplementation. Image variants/transforms and POST-policy size limits are roadmap, not v1.*
 6. **jobs.queue** — background jobs + retries + dead-letter; cron included; wraps graphile-worker; ships both worker shapes (§1).
 7. **webhooks.ingest** — generic verified-inbound-webhook receiver (billing and others compose on it). *Shipped 1.0.0 (2026-06-11), second in actual build order (zero deps, unblocked): stripe + standardwebhooks (the Svix wire format — Resend, Clerk) attested, 18 conformance tests each. Adapters are signature SCHEMES, not vendors; GitHub's scheme is excluded pending a capability RFC (it carries no signed timestamp). v1 replay defense is in-memory per instance — honest limitation in SPEC.md; durable defense arrives with the DB story.*
@@ -32,7 +32,7 @@ The meaningful demonstration is **one app, assembled by an agent writing only se
 | App feature the visitor sees | Part underneath |
 |---|---|
 | Sign in (email + OAuth) | `auth.session` ✅ (email/password; OAuth in 1.1) |
-| Organizations, invites, roles | `auth.tenancy` |
+| Organizations, invites, roles | `auth.tenancy` ✅ (orgs/memberships/roles + scoping gate; invites in 1.x) |
 | Paid plans, checkout, cancel/upgrade | `billing.subscription` (stripe) |
 | Welcome / receipt / invite emails | `email.transactional` ✅ |
 | Stripe webhooks verified, replay-safe | `webhooks.ingest` ✅ |
@@ -54,6 +54,42 @@ The agent writes only seams: the pricing page, `PlanCatalog`, org switcher, emai
 **Demo-ready =** all ten parts attested + the acme repo green + assets 1–3 rendered (4 follows). Build *order* stays per `07` §4 — infrastructure prerequisites decide sequence; the demo set defines the finish line.
 
 **Are UI components parts? No.** Parts are behavior with contracts; UI is the product, and the product is where apps must differ — so UI lives on the app side of the seam, accelerated but never owned: every part ships `examples/` with unstyled, shadcn-compatible reference seam UI (sign-in page, pricing page, org switcher) that the agent copies, restyles, and owns. We interoperate with shadcn rather than compete (`01` §5, `04` §1). Nothing visual is ever attested — but the demo repo gets a real styling pass, because looking good is part of the demonstration.
+
+## 2c. Beyond the ten — the four skeletons (added 2026-06-12)
+
+One demo proved the machine works on one app. The library's purpose is to
+**assemble several kinds of app** from the same verified parts — that recombination
+is the compounding return on each part. Four skeletons, defined as **App Packs**
+(`registry/packs/*.json`, resolvable via `partkit plan --pack <name>`):
+
+| Pack | Skeleton | Adds, beyond the shared core |
+|---|---|---|
+| `saas` | Team SaaS (the acme demo above) | `auth.tenancy`, `billing.subscription`, `admin.crud` |
+| `ai-api` | AI app / API product | `auth.apikey`, `billing.usage`, `webhooks.dispatch` |
+| `marketplace` | Content / marketplace | `search.fulltext`, `flags.feature` |
+| `backoffice` | Internal tool / back office | `admin.crud` (otherwise all shared) |
+
+The `ai-api` pack — the dominant category of agent-built product — required two
+additions to the capability namespace, both accepted as the API-facing siblings
+of existing parts: **`auth.apikey`** (RFC 0002, sibling of `auth.session`) and
+**`webhooks.dispatch`** (RFC 0003, sibling of `webhooks.ingest`). Everything else
+the four packs need was already in the namespace.
+
+Build order stays per `07` §4: **Wave 1 finishes the core ten / the `saas`
+skeleton; Wave 2** (`auth.apikey`, `webhooks.dispatch`, `billing.usage`,
+`flags.feature`, `search.fulltext`) unlocks the other three. "Ten excellent
+before any shallow" still governs — Wave 2 is sequenced, not parallel, and each
+part meets the identical bar.
+
+**A skeleton is "done well"** — the standard a team actually adopts — only when
+an assembled app demonstrates four things in the running product, not just in
+tests: it is **robust** (the security exhibits are live — `429`, replay/tamper
+rejection, scope refusal, unrewritable audit trail), **maintained** (upgrade and
+vendor-flip shown as small diffs), **deployable in the team's own infra**
+(boots on self-hosted Node + Postgres, no required managed vendor, `partkit
+migrate` from clean), and **a team standard the guard enforces** (a teammate's
+agent cannot hand-roll the capability past CI). This is the finish line in
+`07` §8.
 
 
 ## 4. Definition of done, v0
