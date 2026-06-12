@@ -3,13 +3,13 @@
   "version": "1.0.1",
   "adapter": "stripe",
   "content_hash": "sha256:e96a27597dbf175da2cc33d7e2264ceb5971fc944fae7d155b2b55d68ea8be53",
-  "verified_at": "2026-06-12T05:47:51.722Z",
+  "verified_at": "2026-06-12T07:24:29.067Z",
   "dependency_matrix": {
     "node": "22.22.3"
   },
-  "conformance_run": "https://github.com/radosukala/partkit/actions/runs/27397258191",
+  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401181391",
   "tests_passed": 18,
-  "result_hash": "sha256:6e3daab32d3a6ccace37f68130384475ea0d8b7a6f630bd952d5120d090b0152",
+  "result_hash": "sha256:1fcfe9c75a5391f8d0fa4991402f733aeb983fadfd6885933000f21565170f38",
   "signature": "dev:unsigned",
-  "expires": "2026-06-26T05:47:51.723Z"
+  "expires": "2026-06-26T07:24:29.067Z"
 }

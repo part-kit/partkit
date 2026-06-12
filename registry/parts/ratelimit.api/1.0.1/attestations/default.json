@@ -3,13 +3,13 @@
   "version": "1.0.1",
   "adapter": null,
   "content_hash": "sha256:41ca632e69e4676f521abbcf8c96d0d51ae83af6bd8400c9bac7b34e6fe791c6",
-  "verified_at": "2026-06-12T05:47:56.635Z",
+  "verified_at": "2026-06-12T07:24:33.265Z",
   "dependency_matrix": {
     "node": "22.22.3"
   },
-  "conformance_run": "https://github.com/radosukala/partkit/actions/runs/27397258191",
+  "conformance_run": "https://github.com/part-kit/partkit/actions/runs/27401181391",
   "tests_passed": 17,
-  "result_hash": "sha256:c3822473217f3dd9f45c7496f60e46da62a7e427b1078723b3e51120b3eb3a07",
+  "result_hash": "sha256:3e6737edd8ccbdf96be0b288bc3bcda259926b39b8f12fc76818e83d45304e73",
   "signature": "dev:unsigned",
-  "expires": "2026-06-26T05:47:56.636Z"
+  "expires": "2026-06-26T07:24:33.266Z"
 }
