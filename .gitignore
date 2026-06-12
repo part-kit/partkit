@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.partkit-work/
+.env
+.env.*
+!.env.example
+.DS_Store

@@ -1,0 +1,15 @@
+{
+  "part": "email.transactional",
+  "version": "1.0.0",
+  "adapter": "resend",
+  "content_hash": "sha256:ffe8aa06fa7bba2b6b39f197a863027253a7b00c07c018f70392fb724a65dcd0",
+  "verified_at": "2026-06-11T14:02:23.382Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 10,
+  "result_hash": "sha256:0d3893836f10f76e22c169aa31d4ae044ae984eb5919528427edf75d9f92de83",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-25T14:02:23.383Z"
+}

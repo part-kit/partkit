@@ -1,0 +1,91 @@
+{
+  "manifest_version": 1,
+  "part": "email.transactional",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "427d92615f2312565f90d2164ef4701efba23783275011d9bc09f8704dc44391",
+      "bytes": 3244
+    },
+    {
+      "path": "adapters/postmark/adapter.ts",
+      "sha256": "939212edd6ced4b525a9d59c13c1beb109b2f61307a070f5576580f9269082a1",
+      "bytes": 2381
+    },
+    {
+      "path": "adapters/resend/adapter.ts",
+      "sha256": "80e5d5247ec22285770e98814419c72e347523c932edf124325919e22661db0a",
+      "bytes": 2221
+    },
+    {
+      "path": "conformance/fake-vendor.ts",
+      "sha256": "a8b76580f700dedee0ec90791e2323f7581ccdddaca4b25ef817749e77258422",
+      "bytes": 2358
+    },
+    {
+      "path": "conformance/send.test.ts",
+      "sha256": "9765976319aba707cd7dcc0f03f12838c497b7de5eb42f653dcad1f36638b130",
+      "bytes": 6086
+    },
+    {
+      "path": "contract.json",
+      "sha256": "1fba9020cac9ed62e97c74d21acc224e2b24cbbd9d2ec144462aae781ec9844e",
+      "bytes": 1657
+    },
+    {
+      "path": "examples/welcome-email.ts",
+      "sha256": "d306b9189d3203592fd35cbce154bba67303315903c3fbd14ff5c994d1305e6c",
+      "bytes": 943
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "seams.md",
+      "sha256": "dbbc29f74ba74bf1b9f42c43d73cabe9a35282b0ac67aadb3e0b7eaa969e2653",
+      "bytes": 2223
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "a918e36a78d80d1775fe8485350f18eef82a2cab4e09fc6e24ccdbc3d97fabad",
+      "bytes": 2322
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "6b39f54f09cd3f02ff98fe25f5b6366c9a8b1181e6882a0616d57db311b8bead",
+      "bytes": 1493
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "db056cbc152174805b305770f5ea37d9fd635fcea9bc175b85c5122402ab427b",
+      "bytes": 2052
+    },
+    {
+      "path": "src/internal/redact.ts",
+      "sha256": "f41d7edd520e03e760455965acff80c1afc7760492231b91c892145ff9915393",
+      "bytes": 555
+    },
+    {
+      "path": "src/internal/retry.ts",
+      "sha256": "7ebe6de5e003d7dc6859c1dd71e392afbde3d694126a05beb861691319435f9f",
+      "bytes": 948
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "7c4a8ea11bb94312bbc44c8db8dca4921a2b0d8f8c91145bdb7289289a4ec481",
+      "bytes": 1195
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "50cc8b7c9f5e32fb1b751cab94941e58b6748f1754d83cdc318df6f4bef52399",
+      "bytes": 2090
+    }
+  ],
+  "attestations": [
+    "postmark",
+    "resend"
+  ]
+}

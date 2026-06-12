@@ -1,0 +1,38 @@
+{
+  "name": "partkit",
+  "version": "0.2.1",
+  "description": "Verified, attested standard parts for AI coding agents \u2014 the CLI",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://partkit.dev",
+  "keywords": [
+    "ai-agents",
+    "claude-code",
+    "scaffolding",
+    "registry",
+    "attestation",
+    "standard-parts",
+    "codegen"
+  ],
+  "bin": {
+    "partkit": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "tsc -b"
+  },
+  "dependencies": {
+    "@part-kit/core": "0.2.0",
+    "commander": "^12.1.0",
+    "pg": "^8.21.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0"
+  }
+}

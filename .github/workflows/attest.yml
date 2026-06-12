@@ -1,0 +1,59 @@
+name: attest
+# The verification CI embryo (docs/03 §5): re-run every part's conformance on
+# a schedule and re-issue attestations with the public run URL — "verified"
+# stays meaning "recently", and the proof is clickable.
+on:
+  schedule:
+    - cron: "0 3 * * 1,4" # Mon + Thu — comfortably inside the 14-day expiry
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reattest:
+    # Attestations are issued only by the public repo — its run URLs are the
+    # publicly clickable proof. Forks and the private dev mirror skip this.
+    if: github.repository == 'part-kit/partkit'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: partkit
+          POSTGRES_PASSWORD: partkit
+          POSTGRES_DB: partkit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U partkit" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: re-run conformance and re-issue attestations (latest of every part)
+        env:
+          PARTKIT_TEST_DATABASE_URL: postgresql://partkit:partkit@localhost:5432/partkit_test
+        run: |
+          set -euo pipefail
+          for entry in $(node -e "const i=require('./registry/index.json');for(const[p,m]of Object.entries(i.parts))console.log(p+'@'+m.latest)"); do
+            part="${entry%@*}"; version="${entry#*@}"
+            echo "── $part@$version"
+            node scripts/publish-part.mjs --part "$part" --version "$version"
+          done
+      - name: commit re-issued attestations
+        run: |
+          git config user.name "partkit-attest[bot]"
+          git config user.email "attest@partkit.dev"
+          git add registry/parts/*/*/attestations registry/parts/*/*/manifest.json registry/index.json
+          if git diff --cached --quiet; then
+            echo "nothing to re-issue"
+          else
+            git commit -m "chore(registry): scheduled re-attestation — conformance re-run, attestations re-issued"
+            git push
+          fi

@@ -1,0 +1,45 @@
+{
+  "name": "@part-kit/mcp",
+  "version": "0.2.0",
+  "description": "PartKit MCP server \u2014 agents search the parts registry, resolve install plans, and read contracts, seams, and attestations",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://partkit.dev",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "registry",
+    "attestation",
+    "standard-parts"
+  ],
+  "bin": {
+    "partkit-mcp": "./dist/server.js"
+  },
+  "main": "./dist/tools.js",
+  "types": "./dist/tools.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/tools.d.ts",
+      "default": "./dist/tools.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "tsc -b"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@part-kit/core": "0.2.0",
+    "zod": "^3.25.76"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

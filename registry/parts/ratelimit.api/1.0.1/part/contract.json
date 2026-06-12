@@ -1,0 +1,38 @@
+{
+  "part": "ratelimit.api",
+  "version": "1.0.1",
+  "contract_version": "0.1",
+  "provides": [
+    "ratelimit.api@1"
+  ],
+  "requires": [],
+  "platform": {
+    "node": ">=22"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "rateLimit(key: string, rule: RateLimitRule, opts?: RateLimitOpts): Promise<RateLimitResult>",
+      "rateLimitMiddleware(config: RateLimitConfig): (request: Request) => Promise<Response | null>",
+      "rateLimitHeaders(result: RateLimitResult): Record<string, string>",
+      "tooManyRequests(result: RateLimitResult): Response",
+      "class RateLimitError extends Error { code: RateLimitErrorCode }",
+      "types: RateLimitRule, RateLimitResult, RateLimitOpts, RateLimitConfig, RateLimitStore, RateLimitErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {},
+  "invariants": [
+    "Importing the part performs no I/O and never throws; rules and configuration are validated at call time with typed errors",
+    "Within one fixed window, the first `limit` requests for a key are allowed and every request beyond `limit` is rejected",
+    "When the window elapses the counter resets: a key blocked in one window is allowed again in the next",
+    "Keys are isolated \u2014 exhausting one key's budget never consumes or blocks another key's budget",
+    "Every result reports accurate limit, non-negative remaining, and resetAt; the middleware answers 429 with Retry-After and IETF RateLimit-* headers, and rateLimitHeaders exposes the same set for allowed responses",
+    "An invalid rule (non-positive or non-integer limit/window) fails fast with a typed RateLimitError and zero store interactions",
+    "A store failure honors the configured policy \u2014 fail-open by default (request allowed, result flagged degraded) or fail-closed on opt-in (request rejected, result flagged degraded) \u2014 and the raw store error never escapes as an untyped exception"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

@@ -1,0 +1,17 @@
+{
+  "part": "auth.session",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:ee4fd4288825b890a5b0cf79a66759a31b0a5d62cf7a83b043b9b3e35350cc11",
+  "verified_at": "2026-06-12T05:48:06.522Z",
+  "dependency_matrix": {
+    "node": "22.22.3",
+    "npm:better-auth": "1.6.16",
+    "npm:pg": "8.21.0"
+  },
+  "conformance_run": "https://github.com/radosukala/partkit/actions/runs/27397258191",
+  "tests_passed": 7,
+  "result_hash": "sha256:023b8c9d6c51a4b52b72500d1af1f3749f6f60b9d6288413cf93c1ec59f132d4",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-26T05:48:06.523Z"
+}

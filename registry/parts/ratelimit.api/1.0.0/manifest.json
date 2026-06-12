@@ -1,0 +1,75 @@
+{
+  "manifest_version": 1,
+  "part": "ratelimit.api",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "c4c3e6a5bad39a60548d0110e3e3b9ba11e8d0281b6243a1469c91d8d016e431",
+      "bytes": 6052
+    },
+    {
+      "path": "conformance/ratelimit.test.ts",
+      "sha256": "ac83f88387eff8ba6e1527de6d5c05bcad6ee201547eba373f5b236289686742",
+      "bytes": 8776
+    },
+    {
+      "path": "conformance/reference-store.ts",
+      "sha256": "ccc60eb9d8ba8a0e5829a05eb3d7894eb6daffb1d3eda4135d5d70f848a280f8",
+      "bytes": 1803
+    },
+    {
+      "path": "contract.json",
+      "sha256": "db57605b47d050b0034a87b38e886aeb5e04fbd497cc40f435f01880f6016302",
+      "bytes": 2004
+    },
+    {
+      "path": "examples/next-middleware.ts",
+      "sha256": "41ccb7457f6db339acea74f5ba7543baed0ad35727cd118fca90787fdec274d7",
+      "bytes": 2667
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "seams.md",
+      "sha256": "c7f4c685c9569ea2522035ca3ff6fdeb2fcebd3cdc4f8401106f1767a84b4992",
+      "bytes": 4656
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "4a9ada8f9a299636210dc9de54fe21c8a476b957b86e32cf64c4d32d7c5cc8e0",
+      "bytes": 5194
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "d0fcd1f692d919eda73780b18e17ad75189adb9d6b5f83cb68c50eb9c87c5518",
+      "bytes": 683
+    },
+    {
+      "path": "src/internal/key.ts",
+      "sha256": "b760ef0ea1f5cbd918d7dd85107cc142c715a4b9c01557e27b2abfe396fbb349",
+      "bytes": 1045
+    },
+    {
+      "path": "src/internal/memory-store.ts",
+      "sha256": "853175714c536031c78cc110fcd9000587b3abf51daa93b10734cb310d57d087",
+      "bytes": 1654
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "aefb38447fcab76ddf178538b99aef0530d247e9fc2606162d69ab3b179f0497",
+      "bytes": 2072
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "ed01e5cc7b0d6b9f880190c983099958f0e7eabf7748f693282e29e0d012f5b4",
+      "bytes": 857
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

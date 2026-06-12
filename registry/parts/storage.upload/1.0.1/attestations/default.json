@@ -1,0 +1,15 @@
+{
+  "part": "storage.upload",
+  "version": "1.0.1",
+  "adapter": null,
+  "content_hash": "sha256:2949df0a32539ae5c96bcb4bbf0256f90344838d676b402bf687c02633aeb220",
+  "verified_at": "2026-06-12T05:48:01.729Z",
+  "dependency_matrix": {
+    "node": "22.22.3"
+  },
+  "conformance_run": "https://github.com/radosukala/partkit/actions/runs/27397258191",
+  "tests_passed": 13,
+  "result_hash": "sha256:189f65e96fad0dd498dacd3f4c1de2eb5f362ef5513fdb0aa56c9d053473e1b5",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-26T05:48:01.730Z"
+}

@@ -1,0 +1,43 @@
+{
+  "part": "audit.log",
+  "version": "1.0.1",
+  "contract_version": "0.1",
+  "provides": [
+    "audit.log@1"
+  ],
+  "requires": [],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "auditLog(db: SqlExecutor): AuditLog",
+      "AuditLog { append(event: AuditEventInput): Promise<AuditEvent>; query(filter?: AuditQuery): Promise<AuditEvent[]> }",
+      "class AuditError extends Error { code: AuditErrorCode }",
+      "types: SqlExecutor, AuditEvent, AuditEventInput, AuditQuery, AuditLog, AuditErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {},
+  "data_ownership": {
+    "tables": [
+      "audit_events"
+    ],
+    "writes_only_own_tables": true
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; inputs are validated at call time, and every failure \u2014 invalid input or a storage error from the executor \u2014 surfaces as a typed AuditError (raw driver errors never escape)",
+    "append inserts exactly one row with a server-assigned monotonic id and occurred_at timestamp, returns the stored event, and the event is immediately readable via query",
+    "The log is append-only: no mutation is exported, and the database itself rejects UPDATE and DELETE on the events table (trigger) \u2014 the trail cannot be rewritten even with direct table access",
+    "query returns events newest-first by id, honors actor/action/target/since/until filters, and paginates deterministically via the `before` cursor under a bounded limit",
+    "action, target, and metadata round-trip faithfully; every value is parameterized, so SQL metacharacters in inputs are stored literally and never executed",
+    "An invalid event (blank action, over-long field, oversized metadata) or invalid query (non-positive or over-max limit) fails with a typed AuditError and issues zero SQL",
+    "The part operates solely through the provided SqlExecutor seam \u2014 it imports no database driver \u2014 and every statement it issues targets only its own audit_events table"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

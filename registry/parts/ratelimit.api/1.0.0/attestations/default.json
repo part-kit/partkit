@@ -1,0 +1,15 @@
+{
+  "part": "ratelimit.api",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:af36d21946ec0a4db6cff1cb864fe4a0593f681c1b66e247cb8d8c4227295cae",
+  "verified_at": "2026-06-11T15:26:19.440Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 17,
+  "result_hash": "sha256:0423fa264505d4612a52064a401a2b5ec7c2a40c8663c30063f580ca5a07a1a6",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-25T15:26:19.440Z"
+}

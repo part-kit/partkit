@@ -1,0 +1,28 @@
+{
+  "capability": "webhooks.ingest",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Verify inbound webhooks — HMAC signature, timestamp window, replay defense — through a contract-stable interface with pluggable, attested signature-scheme adapters.",
+  "interface": {
+    "exports": [
+      "verifyWebhook(request: WebhookRequest): Promise<VerifiedWebhook>",
+      "onWebhook(handler: (event: VerifiedWebhook) => void | Promise<void>): Unsubscribe",
+      "webhookHandler(request: Request): Promise<Response>",
+      "class WebhookError extends Error { code: WebhookErrorCode; status: number }"
+    ],
+    "events": [],
+    "http_routes": [
+      { "route": "POST /api/webhooks/ingest", "export": "webhookHandler" }
+    ]
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration is validated at call time with typed errors",
+    "A request whose HMAC signature does not verify over the exact raw payload bytes — tampered payload, tampered signature, or missing signature headers — is rejected with a typed error; signature comparison is timing-safe (crypto.timingSafeEqual)",
+    "A signed timestamp outside the tolerance window (default 300 seconds, past or future) is rejected",
+    "A delivery replayed within the tolerance window is rejected (v1: in-memory per instance — serverless limitation stated in SPEC.md)",
+    "Verification operates on the raw payload bytes as received; any re-serialization that changes a single byte fails verification",
+    "All failures surface as typed WebhookError values carrying a recommended HTTP status; secret values never appear in error messages",
+    "webhookHandler acknowledges 2xx only after every registered handler has completed; verification failures return 400 with a generic body; handler failures return 500 so the vendor redelivers"
+  ],
+  "notes": "v1 scope is verification and dispatch. Every adapter's scheme must carry a signed timestamp — schemes without one (GitHub's X-Hub-Signature-256) cannot satisfy invariant 3 uniformly and need a capability RFC before entering. Durable (cross-instance) replay defense arrives as an additive minor with the DB story. The conformance suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

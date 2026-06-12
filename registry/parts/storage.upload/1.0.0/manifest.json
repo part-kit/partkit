@@ -1,0 +1,90 @@
+{
+  "manifest_version": 1,
+  "part": "storage.upload",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "a7263bf313847313a4f3bcaf5ec1c64813eb58a98a1a77b43e95221bc324125a",
+      "bytes": 5495
+    },
+    {
+      "path": "conformance/presign.test.ts",
+      "sha256": "81ea68ff0bc8eab74b43b402b147a57743efb0c3d71c8d3cf8729ac8c2cbeb12",
+      "bytes": 10141
+    },
+    {
+      "path": "conformance/reference-sigv4.ts",
+      "sha256": "f1b7448428fb27651d95ea1cf53f0e19e4585d0255f52ca0d1ab38f3c8d08278",
+      "bytes": 3351
+    },
+    {
+      "path": "conformance/vectors.ts",
+      "sha256": "9cdb6bc218a385f5ee1b4f0d3f325059d53f16f1bc05e6cbf5607b78b1a43e22",
+      "bytes": 4212
+    },
+    {
+      "path": "contract.json",
+      "sha256": "f8e3f0fa3f82a5f06002014a268e09a544077be0ecaed4f181084a75e2f6246c",
+      "bytes": 2402
+    },
+    {
+      "path": "examples/browser-upload.ts",
+      "sha256": "bf2ce701ddf1ae2492e77b68fde21a5b920385594cb63202cdacad0c5f3f6bd2",
+      "bytes": 1243
+    },
+    {
+      "path": "examples/upload-route.ts",
+      "sha256": "98afeb24bac76c68b6310abab3b7e90ce41a97b3bc3c405f2270c226fa0f0380",
+      "bytes": 1402
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "seams.md",
+      "sha256": "ed30ae3b1d53cfc0132ec4780b4e9b01f9f685d6ee4135fdf5cfdbff44db9e52",
+      "bytes": 3804
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "df031cc1446570389b2f209b8403ddee6119f426f7f7b862a4b544288a484ef4",
+      "bytes": 1607
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "a0e7b88657d02f24485d41e76b8e3b7789858ff9296a8ae928b456651e4717e3",
+      "bytes": 2673
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "bc843c0c13c16dcaff018f17c200051ac129284a942e7228a50920a69260a0fe",
+      "bytes": 606
+    },
+    {
+      "path": "src/internal/presign.ts",
+      "sha256": "e26d30513515c8a67640ecabc6407891d975555350961bc04cf3054e3474f62b",
+      "bytes": 2738
+    },
+    {
+      "path": "src/internal/sigv4.ts",
+      "sha256": "bb410ec0e4ab866be6c1aea8c1e5a835f337eb0919de9ea835c47c3feec367b3",
+      "bytes": 2868
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "661490bbe3739b49351dcb7986e185410aabd9d6aaf2568412aaf4d7c2c8ab1d",
+      "bytes": 961
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "bf60825314357aa6c074bf096b8e301236ad594cdfc6c0e9f72b03ce9dcd0896",
+      "bytes": 1985
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

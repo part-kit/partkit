@@ -1,0 +1,27 @@
+{
+  "capability": "ratelimit.api",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Fixed-window API rate limiting through a contract-stable interface, with a built-in per-instance in-memory store and a typed pluggable-store seam for Redis-compatible backends.",
+  "interface": {
+    "exports": [
+      "rateLimit(key: string, rule: RateLimitRule, opts?: RateLimitOpts): Promise<RateLimitResult>",
+      "rateLimitMiddleware(config: RateLimitConfig): (request: Request) => Promise<Response | null>",
+      "rateLimitHeaders(result: RateLimitResult): Record<string, string>",
+      "tooManyRequests(result: RateLimitResult): Response",
+      "class RateLimitError extends Error { code: RateLimitErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; rules and configuration are validated at call time with typed errors",
+    "Within one fixed window, the first `limit` requests for a key are allowed and every request beyond `limit` is rejected",
+    "When the window elapses the counter resets: a key blocked in one window is allowed again in the next",
+    "Keys are isolated — exhausting one key's budget never consumes or blocks another key's budget",
+    "Every result reports accurate limit, non-negative remaining, and resetAt; the middleware answers 429 with Retry-After and IETF RateLimit-* headers, and rateLimitHeaders exposes the same set for allowed responses",
+    "An invalid rule (non-positive or non-integer limit/window) fails fast with a typed RateLimitError and zero store interactions",
+    "A store failure honors the configured policy — fail-open by default (request allowed, result flagged degraded) or fail-closed on opt-in (request rejected, result flagged degraded) — and the raw store error never escapes as an untyped exception"
+  ],
+  "notes": "v1 is fixed-window with a per-instance in-memory store; the serverless multi-instance limitation is stated honestly in SPEC.md. The store is a SEAM (app-provided), not a registry adapter — so this capability ships zero adapters and the same conformance suite runs against both the built-in store and an independent reference store. Durable cross-instance limiting and sliding-window arrive as additive minors. Sliding-window or token-bucket algorithms, if added, are new capability majors or an algorithm field by RFC."
+}

@@ -1,0 +1,39 @@
+{
+  "part": "storage.upload",
+  "version": "1.0.0",
+  "contract_version": "0.1",
+  "provides": ["storage.upload@1"],
+  "requires": [],
+  "platform": { "node": ">=22" },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "presignUpload(key: string, opts?: PresignUploadOptions): Promise<PresignedRequest>",
+      "presignDownload(key: string, opts?: PresignDownloadOptions): Promise<PresignedRequest>",
+      "class StorageError extends Error { code: StorageErrorCode }",
+      "types: PresignedRequest, PresignUploadOptions, PresignDownloadOptions, StorageErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {
+    "STORAGE_ENDPOINT": { "required": true },
+    "STORAGE_REGION": { "required": true },
+    "STORAGE_BUCKET": { "required": true },
+    "STORAGE_ACCESS_KEY_ID": { "required": true, "secret": true },
+    "STORAGE_SECRET_ACCESS_KEY": { "required": true, "secret": true },
+    "STORAGE_FORCE_PATH_STYLE": { "required": false }
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; presigning is pure computation (no network), and configuration and inputs are validated at call time with typed errors",
+    "Presigned signatures conform to AWS Signature Version 4 exactly: byte-for-byte identical to the canonical AWS implementation (AWS CLI / botocore) for the same inputs, across path-style and virtual-hosted addressing",
+    "Each presigned request carries the required X-Amz-* query parameters with the correct credential scope (date/region/s3/aws4_request), host, SignedHeaders, and UNSIGNED-PAYLOAD; method is PUT for upload and GET for download",
+    "The signature binds the whole request: changing the key, method, expiry, region, or secret changes the signature, so a presigned URL cannot be repurposed",
+    "Object keys with spaces, Unicode, and S3-special characters are URI-encoded per the S3 rules so they sign and address correctly; empty, over-long, or control-character keys are rejected with a typed error and no output",
+    "Expiry is bounded to 1..604800 seconds and reflected in both X-Amz-Expires and the returned expiresAt; an out-of-range expiry fails fast with a typed error",
+    "The secret access key never appears in any URL, header, or error message; all failures surface as typed StorageError values"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

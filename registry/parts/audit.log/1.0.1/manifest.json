@@ -1,0 +1,75 @@
+{
+  "manifest_version": 1,
+  "part": "audit.log",
+  "version": "1.0.1",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "71f05ac35f0ca05bfb18e99898e35ab295be6296a5cbee8d62bc0d6b8a712a52",
+      "bytes": 6352
+    },
+    {
+      "path": "conformance/audit.test.ts",
+      "sha256": "83344339f5b48a02925f90303e03772fdbc6f3ad5e654e7579c5df9715c881ce",
+      "bytes": 9194
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "a217e6161582419d32e8e851fc52dd78016afec8bc84ca26ad60467af0ba4c5f",
+      "bytes": 1346
+    },
+    {
+      "path": "contract.json",
+      "sha256": "f96ab1d7c76e7b27e401dbbb1d34a9a2e2c8059edf25756e93acd86b427e941b",
+      "bytes": 2186
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "a36b04762917e57e50198c6d852a202f40edc08d7af5302040786d320d10772d",
+      "bytes": 1091
+    },
+    {
+      "path": "examples/record-login.ts",
+      "sha256": "8cdb6f202319495c93504182671a47d00d2e4ffc1b9d4284c822e3942f5c6b8e",
+      "bytes": 993
+    },
+    {
+      "path": "migrations/001-create-audit-events.sql",
+      "sha256": "c29101f4f02d5914a620931624603d8de99ca54a80d5b15fc7219ecb7944d20a",
+      "bytes": 2272
+    },
+    {
+      "path": "seams.md",
+      "sha256": "2b013d657e908b6526b33911a5a5a12a2e0794cf1cbcd3e2e92b26d5ff0e5052",
+      "bytes": 3956
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "36473493e263626b36d42af9c7d19fc586f1e28cb78c58d5a8cfc194d3328ebf",
+      "bytes": 2460
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "ba67775079c31d3276dad7a6cf0b245ca77ab33bb00f3f8b081ed5ac4c214b29",
+      "bytes": 715
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "5139ffa8a7f195a33ce22db8c051dd1dee573f78be9451a01e569ecc788be5e6",
+      "bytes": 1955
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "44f6da994558c9d968455864baf989bb9325a57f8460f8e5f6f95bd9d3ee020a",
+      "bytes": 1845
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "cde1427c34079e98dff51ef9d7683c5f3102189919e1f0b4769d627e6b178fe5",
+      "bytes": 4076
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "capability": "email.transactional",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Send transactional email through a contract-stable interface with pluggable, attested vendor adapters.",
+  "interface": {
+    "exports": [
+      "send(message: EmailMessage): Promise<SendResult>",
+      "class EmailError extends Error { code: EmailErrorCode; retryable: boolean; status: number | null }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration is validated at call time with typed errors",
+    "An invalid message fails fast with a typed error and zero network calls",
+    "CR/LF sequences in subject, display names, or custom headers are rejected (header-injection defense)",
+    "Transient vendor failures (429, 5xx, network) are retried up to 3 attempts with exponential backoff and jitter; permanent failures are never retried",
+    "All failures surface as typed EmailError values; raw vendor responses never escape the part",
+    "Secret values never appear in error messages"
+  ],
+  "notes": "v1 scope is sending. Delivery events arrive as an additive minor via webhooks.ingest composition. The conformance suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

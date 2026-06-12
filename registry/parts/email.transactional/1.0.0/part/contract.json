@@ -1,0 +1,38 @@
+{
+  "part": "email.transactional",
+  "version": "1.0.0",
+  "contract_version": "0.1",
+  "provides": ["email.transactional@1"],
+  "requires": [],
+  "platform": { "node": ">=22" },
+  "adapters": [
+    { "name": "resend", "vendor_api": "2026-06", "status": "attested" },
+    { "name": "postmark", "vendor_api": "v1", "status": "attested" }
+  ],
+  "interface": {
+    "exports": [
+      "send(message: EmailMessage): Promise<SendResult>",
+      "class EmailError extends Error { code: EmailErrorCode; retryable: boolean; status: number | null }",
+      "types: EmailMessage, EmailAddress, SendResult, EmailErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {
+    "EMAIL_ADAPTER": { "required": true, "enum": ["resend", "postmark"] },
+    "EMAIL_FROM": { "required": true },
+    "RESEND_API_KEY": { "required": false, "secret": true },
+    "POSTMARK_SERVER_TOKEN": { "required": false, "secret": true }
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration is validated at call time with typed errors",
+    "An invalid message fails fast with a typed error and zero network calls",
+    "CR/LF sequences in subject, display names, or custom headers are rejected (header-injection defense)",
+    "Transient vendor failures (429, 5xx, network) are retried up to 3 attempts with exponential backoff and jitter; permanent failures are never retried",
+    "All failures surface as typed EmailError values; raw vendor responses never escape the part",
+    "Secret values never appear in error messages"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

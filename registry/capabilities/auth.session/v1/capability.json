@@ -1,0 +1,32 @@
+{
+  "capability": "auth.session",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Email/password authentication and server-validated sessions through a contract-stable interface, wrapping Better Auth behind part-owned tables.",
+  "interface": {
+    "exports": [
+      "authHandler(request: Request): Promise<Response>",
+      "getSession(headers: Headers): Promise<SessionResult | null>",
+      "requireSession(headers: Headers): Promise<SessionResult>",
+      "signUp(input: SignUpInput): Promise<AuthResult>",
+      "signIn(input: SignInInput): Promise<AuthResult>",
+      "signOut(headers: Headers): Promise<void>",
+      "class AuthError extends Error { code: AuthErrorCode }"
+    ],
+    "events": [],
+    "http_routes": [
+      { "route": "GET /api/auth/[...all]", "export": "authHandler" },
+      { "route": "POST /api/auth/[...all]", "export": "authHandler" }
+    ]
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration (secret, database URL, base URL) is validated lazily at first use with typed errors",
+    "signUp creates a user and an active session; the password is stored only as a hash in auth_account (never plaintext), and a duplicate email is rejected with a typed error",
+    "signIn with valid credentials issues a session that getSession resolves; an unknown email or a wrong password is rejected with the same typed error (no account enumeration)",
+    "getSession returns the authenticated user and session for a valid session token and null for a missing, malformed, or expired one; requireSession throws a typed AuthError when there is no valid session",
+    "signOut invalidates the session so the same token no longer resolves",
+    "authHandler is a mountable fetch handler that serves the auth routes; importing or constructing it performs no I/O",
+    "The part owns only the auth_* tables and surfaces every failure as a typed AuthError — Better Auth's internal errors never escape raw, and secrets never appear in messages"
+  ],
+  "notes": "v1 wraps Better Auth (email/password + sessions + guards); OAuth providers arrive as an additive 1.1 wired as seams (a provider is a seam, not a registry adapter). A second auth library would be a SECOND part providing auth.session@1 — capability-level interchangeability, not an adapter axis — so this part ships zero adapters. Better Auth's schema is owned as auth_*-prefixed part tables (modelName mapping) created by partkit migrate, NOT Better Auth's runtime migrator. Conformance runs against real Better Auth + real Postgres (gated on PARTKIT_TEST_DATABASE_URL). The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

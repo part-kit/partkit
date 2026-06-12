@@ -1,0 +1,42 @@
+{
+  "name": "@part-kit/core",
+  "version": "0.2.0",
+  "description": "PartKit protocol reference implementation: contract/lockfile/attestation schemas, part hashing, registry client, and the init/add/verify/guard operations",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://partkit.dev",
+  "keywords": [
+    "ai-agents",
+    "registry",
+    "attestation",
+    "standard-parts"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "tsc -b"
+  },
+  "dependencies": {
+    "semver": "^7.8.4",
+    "zod": "~3.24.4"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.7.1"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "part": "email.transactional",
+  "version": "1.0.0",
+  "adapter": "postmark",
+  "content_hash": "sha256:b38efc3d689c3fd7b7f84f8eafc60964ecfa2067265fd201c5bcb7a4dc6a2295",
+  "verified_at": "2026-06-11T14:02:26.007Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 10,
+  "result_hash": "sha256:648766d5dc8a090193ef0b0957eaf3b6fe01c775eb62971f5ae72325524fa2e7",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-25T14:02:26.007Z"
+}

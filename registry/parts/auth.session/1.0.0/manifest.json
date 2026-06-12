@@ -1,0 +1,70 @@
+{
+  "manifest_version": 1,
+  "part": "auth.session",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "647ed7e4150978ff156e6eca7eb4ce7d7e54573d36e2a0295e3594ebaa7a1666",
+      "bytes": 5955
+    },
+    {
+      "path": "conformance/auth.test.ts",
+      "sha256": "b873c79fec9363e45c854d957bbccd917d088568bd2dd4ef5fd0bbf20a4ab187",
+      "bytes": 8041
+    },
+    {
+      "path": "contract.json",
+      "sha256": "84c29cad00df43cfc2a97790928734905a3a068e720b85d2516a688c7a92d56f",
+      "bytes": 2593
+    },
+    {
+      "path": "examples/auth-route.ts",
+      "sha256": "ce769b70c360fbe73b5172bd351b2a76a401c7f377d908d3d50e6a60ada4c3bb",
+      "bytes": 673
+    },
+    {
+      "path": "examples/protect-page.ts",
+      "sha256": "2fc2123d20d286fd83cc671a95f0eaaa90b503e3deca1a576b42d71852819e38",
+      "bytes": 1125
+    },
+    {
+      "path": "migrations/001-create-auth-tables.sql",
+      "sha256": "f0a29424c169e47db0228894c7bc17cc2c37f69b1c578083d1d78dac090ad715",
+      "bytes": 2486
+    },
+    {
+      "path": "seams.md",
+      "sha256": "0590e49def44daa8bb2cf0d731fdc477259eaa565cd15a13de09f93726c22a7e",
+      "bytes": 4070
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "6a268a4d169491aa62dac040035afed53f1eec1fca02906549c4219e8c424240",
+      "bytes": 4156
+    },
+    {
+      "path": "src/internal/auth.ts",
+      "sha256": "84039b0f6ac0c547a86428450b0e3946805510f1439e3a8aa4b766025f9bbe96",
+      "bytes": 4040
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "4a9d45742e0033ba698a5b63659f97f2679cf9e61505c010c2d6244d7bc514d5",
+      "bytes": 1327
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "7f64bdcfaadd5ba669bc71ff9cabc9871e14eb39e3e1e80aa0228213f0e0a955",
+      "bytes": 929
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "8ce105fe95f7067d6fcc0454679a60bb7121fae0908aede0e8aa87f46963822e",
+      "bytes": 1115
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

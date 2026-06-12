@@ -1,0 +1,96 @@
+{
+  "manifest_version": 1,
+  "part": "webhooks.ingest",
+  "version": "1.0.1",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "84ba963d64a1ab03953e36dba04129e19c6f71c11f4129e491d3664c07398e40",
+      "bytes": 6039
+    },
+    {
+      "path": "adapters/standardwebhooks/adapter.ts",
+      "sha256": "1bbfd0d8d385daef2f5ce2c2feb2e249d2deaafa5da901827457ce9a5f7f9ec4",
+      "bytes": 3026
+    },
+    {
+      "path": "adapters/stripe/adapter.ts",
+      "sha256": "c70994e7e3398b1407a724b7b1542ec727b805f6301f26dd8a4d8c7cee6dfa43",
+      "bytes": 2817
+    },
+    {
+      "path": "conformance/fake-sender.ts",
+      "sha256": "42b45f10492f9a1f513d824d331edf3ac2b242e0ed32e4d282cbafbba89020fd",
+      "bytes": 2355
+    },
+    {
+      "path": "conformance/verify.test.ts",
+      "sha256": "8f4010cf781b32867f4232e180caf3aa80341a62ad341f1c30a092ba3b7dad97",
+      "bytes": 11854
+    },
+    {
+      "path": "contract.json",
+      "sha256": "e3e975738f194b248a088a05b78026f8f32da7b915fe4df80063c88231cfe66b",
+      "bytes": 2473
+    },
+    {
+      "path": "examples/next-route.ts",
+      "sha256": "be3dc497cd6c6753f14a9d52d389dc5f674854f7014a5b456d1be05f15e36567",
+      "bytes": 1315
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "seams.md",
+      "sha256": "e5f006a6f09a16ed04b9f72dff0e3ede4535b2965922070726996a9ae64b1620",
+      "bytes": 4789
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "f723617bfc4dbc679a55288100c18721b478911cb912293019f27f08d827a9ed",
+      "bytes": 4942
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "a19b6e5fce2c406abde435d7f087521461fa634d258b43e4fe521c4aee17390f",
+      "bytes": 1090
+    },
+    {
+      "path": "src/internal/crypto.ts",
+      "sha256": "40a5e060a653e59b905c7c76a55fedaae1bb8279f8e6cee5c7463085a93941d1",
+      "bytes": 1569
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "81219d961935ab91ef0d50d39aacf45fd2feecb6a26f699f57b8aea054f28f9e",
+      "bytes": 926
+    },
+    {
+      "path": "src/internal/headers.ts",
+      "sha256": "9faac6e5403ea0889aad3cb954ed58a60290518ae3e8f9c47ffdad29dc28e01f",
+      "bytes": 871
+    },
+    {
+      "path": "src/internal/redact.ts",
+      "sha256": "ad41e8f3cdee7cbe3d7b3c8d6b8ddbecc957dc9ef9fe9c1a519f53a3de9172bc",
+      "bytes": 552
+    },
+    {
+      "path": "src/internal/replay.ts",
+      "sha256": "a8a38070471495593ea516d00e97b415e50cafec937fcbf3dcef5dd2319bd51e",
+      "bytes": 1477
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "6c46ab9162cc5df8f6e971215d2469a5f6b1e475ad80579c33cab3f9386a36d9",
+      "bytes": 2277
+    }
+  ],
+  "attestations": [
+    "standardwebhooks",
+    "stripe"
+  ]
+}

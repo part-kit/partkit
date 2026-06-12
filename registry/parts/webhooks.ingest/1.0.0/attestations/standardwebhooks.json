@@ -1,0 +1,15 @@
+{
+  "part": "webhooks.ingest",
+  "version": "1.0.0",
+  "adapter": "standardwebhooks",
+  "content_hash": "sha256:fc13fea0ccb87711012419913290892fbae248050d6149ec5a138b8dae8f238c",
+  "verified_at": "2026-06-11T14:25:02.560Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 18,
+  "result_hash": "sha256:5b0c6118a75d417938d2aaeaa8f85fab32db7467e83334a35b9c1637ad900ec9",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-25T14:25:02.560Z"
+}

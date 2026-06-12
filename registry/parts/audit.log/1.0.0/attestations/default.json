@@ -1,0 +1,15 @@
+{
+  "part": "audit.log",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:e4392656db5604752e53a3e7ad2e2245c03d6f91c6c00f926809eef2789714da",
+  "verified_at": "2026-06-11T16:12:12.167Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 9,
+  "result_hash": "sha256:884d490a063966ffd2cee6275e1fe94de16be8fa3e114a4f826f6241319f29cc",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-25T16:12:12.168Z"
+}

@@ -1,0 +1,64 @@
+{
+  "registry_version": 1,
+  "parts": {
+    "email.transactional": {
+      "latest": "1.0.1",
+      "versions": [
+        "1.0.0",
+        "1.0.1"
+      ],
+      "provides": [
+        "email.transactional@1"
+      ]
+    },
+    "webhooks.ingest": {
+      "latest": "1.0.1",
+      "versions": [
+        "1.0.0",
+        "1.0.1"
+      ],
+      "provides": [
+        "webhooks.ingest@1"
+      ]
+    },
+    "ratelimit.api": {
+      "latest": "1.0.1",
+      "versions": [
+        "1.0.0",
+        "1.0.1"
+      ],
+      "provides": [
+        "ratelimit.api@1"
+      ]
+    },
+    "audit.log": {
+      "latest": "1.0.1",
+      "versions": [
+        "1.0.0",
+        "1.0.1"
+      ],
+      "provides": [
+        "audit.log@1"
+      ]
+    },
+    "storage.upload": {
+      "latest": "1.0.1",
+      "versions": [
+        "1.0.0",
+        "1.0.1"
+      ],
+      "provides": [
+        "storage.upload@1"
+      ]
+    },
+    "auth.session": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "auth.session@1"
+      ]
+    }
+  }
+}

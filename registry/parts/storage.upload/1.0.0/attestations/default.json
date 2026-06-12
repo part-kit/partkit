@@ -1,0 +1,15 @@
+{
+  "part": "storage.upload",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:99fe78a4f53374cf2ab5ea877b8ef688fb636914551df013bdab708e48cafd59",
+  "verified_at": "2026-06-11T17:59:18.296Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 13,
+  "result_hash": "sha256:a6d08edddd511427d705660763ac5132bb36490497843ba1789df0d219f87ccf",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-25T17:59:18.296Z"
+}
