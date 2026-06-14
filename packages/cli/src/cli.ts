@@ -7,6 +7,7 @@ import {
   GUARD_MESSAGE,
   MIGRATIONS_TABLE,
   addPart,
+  auditRepo,
   ejectPart,
   guardRepo,
   initRepo,
@@ -17,6 +18,7 @@ import {
   runMigrations,
   upgradePart,
   verifyRepo,
+  type AuditCheck,
   type SqlExecutor,
 } from "@part-kit/core";
 
@@ -151,6 +153,45 @@ program
       }
       const warnNote = res.findings.length > 0 ? " (with warnings)" : "";
       console.log(`✔ ${res.checked} part(s) verified${warnNote}`);
+    } catch (e) {
+      fail(e);
+    }
+  });
+
+program
+  .command("audit")
+  .description("Did this repo respect its contracts? Boundary + attestations + routes/env/sprawl in one pass")
+  .option("--strict", "treat staleness and unsigned dev attestations as failures")
+  .option("--json", "print the raw audit result as JSON")
+  .action(async (o: { strict?: boolean; json?: boolean }) => {
+    try {
+      const res = await auditRepo(process.cwd(), { strict: o.strict === true });
+      if (o.json === true) {
+        console.log(JSON.stringify(res, null, 2));
+        if (!res.ok) process.exit(1);
+        return;
+      }
+      const icon = (l: AuditCheck["level"]): string =>
+        l === "fail" ? "✖" : l === "warn" ? "⚠" : "✔";
+      console.log(`PARTKIT AUDIT · ${res.parts} part(s) · ${res.checks.length} checks\n`);
+      for (const c of res.checks) {
+        console.log(`  ${icon(c.level)} ${c.key.padEnd(13)} ${c.summary}`);
+        for (const f of c.findings) {
+          const mark = f.level === "fail" ? "✖" : f.level === "warn" ? "⚠" : "·";
+          console.log(`      ${mark} ${f.message}`);
+          if (f.fix !== undefined) console.log(`        → ${f.fix}`);
+        }
+      }
+      const { pass, warn, fail } = res.counts;
+      console.log(`\n${pass} clean · ${warn} warning(s) · ${fail} failure(s)`);
+      if (!res.ok) {
+        console.error("\npartkit audit failed — a contract was not respected.");
+        process.exit(1);
+      }
+      console.log(
+        "Boundary intact, attestations verified. Warnings are guidance, not gates" +
+          (warn > 0 ? " — each lists the seam-side fix." : "."),
+      );
     } catch (e) {
       fail(e);
     }

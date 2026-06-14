@@ -1,0 +1,16 @@
+{
+  "part": "billing.subscription",
+  "version": "1.0.0",
+  "adapter": "stripe",
+  "content_hash": "sha256:87acb68da4671141a46c4e60bd7b6b7e83db5122b480128615ba7d043ba17bf4",
+  "verified_at": "2026-06-14T05:25:43.978Z",
+  "dependency_matrix": {
+    "node": "25.3.0",
+    "npm:stripe": "22.2.1"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 27,
+  "result_hash": "sha256:3267cce7e5a2f206e4029cc404dca2be24cb000e07447606fdadfc39c01806fe",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T05:25:43.980Z"
+}

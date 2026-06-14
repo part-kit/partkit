@@ -88,6 +88,15 @@
       "provides": [
         "admin.crud@1"
       ]
+    },
+    "billing.subscription": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "billing.subscription@1"
+      ]
     }
   }
 }

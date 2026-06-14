@@ -40,7 +40,7 @@ Interiors wrap proven code; they do not rewrite it. The auth part wraps Better A
   "platform": { "node": ">=22", "next": ">=15 <17", "postgres": ">=16" },
   "adapters": [
     { "name": "stripe",        "vendor_api": "2026-04", "status": "attested",
-      "npm_dependencies": { "stripe": "^17.0.0" } },
+      "npm_dependencies": { "stripe": "^22.0.0" } },
     { "name": "paddle",        "vendor_api": "v2",      "status": "attested" },
     { "name": "lemonsqueezy",  "vendor_api": "v1",      "status": "community" }
   ],

@@ -1,0 +1,110 @@
+{
+  "manifest_version": 1,
+  "part": "billing.subscription",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "ad62f10b21c06cd850aca24a43bb577eac2c94deac91b03bd77065de394e5f0f",
+      "bytes": 7151
+    },
+    {
+      "path": "adapters/stripe/adapter.ts",
+      "sha256": "575e3700a9a5c84433515a5856a66d1d4d2d5f5ce642ab365c3c7f816ec6e7ed",
+      "bytes": 9732
+    },
+    {
+      "path": "conformance/billing.test.ts",
+      "sha256": "e610b2cf04fa5f7b741ea60a06836af70183641090920529c87b955b00c8c846",
+      "bytes": 27134
+    },
+    {
+      "path": "conformance/fake-sender.ts",
+      "sha256": "e203f6995db65fcc6822c86625589d8706c9c87aebe2be20dad4fe23a1c51677",
+      "bytes": 784
+    },
+    {
+      "path": "conformance/package.json",
+      "sha256": "4d3030d4fcf18b0ff662a7c834d493b3602828bc6099f4782d55efef55fd88f0",
+      "bytes": 511
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "df2e2171d4f335c8489b21ffb655499b18bc054785f1ff640f72ab38c265cf75",
+      "bytes": 758
+    },
+    {
+      "path": "contract.json",
+      "sha256": "ac7759353f8caef4f01039b800aa50baea315c30dfbceec7f216f6faddd07ece",
+      "bytes": 5633
+    },
+    {
+      "path": "examples/checkout-action.ts",
+      "sha256": "12f48adc0856ccfdb4912dc9453acacf1e34a5f8de98149b52fec64589b873b4",
+      "bytes": 1192
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "c693a8275017066e9dbd4d7bf21d8c65559e8a6d6e2f765cdcc2a7ed73c5cf29",
+      "bytes": 803
+    },
+    {
+      "path": "examples/plan-catalog.ts",
+      "sha256": "c2fc8d710839eeec51f243df26ecac6afe8f80ec76b1af10305603344543594a",
+      "bytes": 605
+    },
+    {
+      "path": "examples/webhook-route.ts",
+      "sha256": "b0670183eff7ba599f78911c060429d1a3c1932325cfd31132f90939e19d8a7c",
+      "bytes": 1488
+    },
+    {
+      "path": "migrations/001-create-billing-tables.sql",
+      "sha256": "402d866de1770782508847c9c3d091ce3d4fcfefd8bddf137661d8c81561c55f",
+      "bytes": 3681
+    },
+    {
+      "path": "seams.md",
+      "sha256": "1c8018fe411bbadecf9e854f510fe53434c3ea5c2344b24f8ffbd852b7c6c925",
+      "bytes": 6700
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "5fe1f0962bb842abb21be2e8babab003c39258ccfea15681d7e184a444d5b867",
+      "bytes": 1546
+    },
+    {
+      "path": "src/internal/billing.ts",
+      "sha256": "d53e83dc8ddfa07756bd8bd79b3fefcf2f4fb0671ed12ce67dc5aafba7a8f747",
+      "bytes": 11346
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "501a29dc380a697ed391f2c09881f1c14fb83b86d4ef9041258523e0aa8d3166",
+      "bytes": 1487
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "faa270aeccf16cfaf4ba4b465dd998f812defd882d5f98601f4ae7cca08b45c7",
+      "bytes": 987
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "f13a37c9a5a8d187027d786514b4f7c3003d9ca35efc59f1669f3e9b9741baaf",
+      "bytes": 2821
+    },
+    {
+      "path": "src/internal/store.ts",
+      "sha256": "d89619b3701b9140e8abd910e7cf97001da9c56c6103ec5b13e99a9d86d077f4",
+      "bytes": 2643
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "2f8630684bbbdc7665bc0414f9355552a7bb63a4a293da1af80e36e0d20fee04",
+      "bytes": 6441
+    }
+  ],
+  "attestations": [
+    "stripe"
+  ]
+}

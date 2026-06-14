@@ -15,6 +15,7 @@
  */
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -22,6 +23,37 @@ import { fileURLToPath } from "node:url";
 import { runIsolatedConformance } from "./conformance-harness.mjs";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
+
+/**
+ * Load conformance secrets from the repo's gitignored env files into process.env
+ * (real exported vars always win; never overrides). Vendor-sandbox keys for
+ * gated conformance (PARTKIT_TEST_DATABASE_URL, STRIPE_TEST_SECRET_KEY, …) live
+ * in apps/web/.env.local or a root .env — both gitignored — so the part agent
+ * doesn't have to juggle them by hand. Spawned conformance (isolated harness or
+ * in-repo vitest) inherits process.env, so the keys reach the tests.
+ */
+for (const rel of [".env", "apps/web/.env.local"]) {
+  let raw;
+  try {
+    raw = readFileSync(path.join(repoRoot, rel), "utf8");
+  } catch {
+    continue; // file absent — fine
+  }
+  for (const line of raw.split("\n")) {
+    const m = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(line);
+    if (!m || line.trimStart().startsWith("#")) continue;
+    const key = m[1];
+    if (process.env[key] !== undefined) continue; // explicit env wins
+    let val = m[2].trim();
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1);
+    }
+    process.env[key] = val;
+  }
+}
 
 let core;
 try {

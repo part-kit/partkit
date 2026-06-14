@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "partkit-web-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "apps/web/out"],
+      "port": 4173
+    },
+    {
+      "name": "web-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/rado/code/partkit/apps/web", "--", "-p", "4190"],
+      "port": 4190
+    },
+    {
+      "name": "demo-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/rado/code/partkit-demo-waitlist", "--", "-p", "4180"],
+      "port": 4180
+    },
+    {
+      "name": "infra-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/rado/code/partkit-infra", "--", "-p", "4200"],
+      "port": 4200
+    }
+  ]
+}

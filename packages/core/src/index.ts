@@ -56,6 +56,14 @@ export {
   type VerifyResult,
 } from "./ops/verify.js";
 export { guardRepo, type GuardResult } from "./ops/guard.js";
+export {
+  auditRepo,
+  type AuditCheck,
+  type AuditCheckKey,
+  type AuditFinding,
+  type AuditLevel,
+  type AuditResult,
+} from "./ops/audit.js";
 export { upgradePart, type UpgradeOptions, type UpgradeResult } from "./ops/upgrade.js";
 export { ejectPart, type EjectOptions, type EjectResult } from "./ops/eject.js";
 export {

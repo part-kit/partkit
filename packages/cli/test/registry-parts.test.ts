@@ -418,3 +418,60 @@ describe("real registry: admin.crud installs end-to-end (RFC 0004; owns no table
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: billing.subscription installs end-to-end (stripe adapter; OSS-wrap + env + migration; requires auth.session)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    // billing declares stripe in the stripe adapter's npm_dependencies → needs a package.json.
+    await writeFile(path.join(repo, "package.json"), JSON.stringify({ name: "app", version: "0.0.0" }));
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("auto-selects the single stripe adapter, scaffolds env, merges stripe, vendors the migration, verifies green", async () => {
+    const res = await addPart(repo, { name: "billing.subscription" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBe("stripe"); // one installable adapter → auto-selected
+    expect(res.envKeys).toEqual(expect.arrayContaining(["BILLING_SECRET_KEY", "BILLING_WEBHOOK_SECRET"]));
+
+    await stat(path.join(repo, "parts/billing.subscription/src/index.ts"));
+    await stat(path.join(repo, "parts/billing.subscription/adapters/selected/adapter.ts"));
+    await stat(path.join(repo, "parts/billing.subscription/seams.md"));
+    await stat(path.join(repo, "parts/billing.subscription/examples/webhook-route.ts"));
+    await stat(path.join(repo, "parts/billing.subscription/migrations/001-create-billing-tables.sql"));
+    await stat(path.join(repo, "parts/billing.subscription/ATTESTATION.json"));
+    // only the selected adapter is vendored
+    await expect(stat(path.join(repo, "parts/billing.subscription/adapters/stripe"))).rejects.toThrow();
+
+    const envExample = await readFile(path.join(repo, ".env.example"), "utf8");
+    expect(envExample).toContain("BILLING_SECRET_KEY");
+    expect(envExample).toContain("BILLING_WEBHOOK_SECRET");
+
+    // per-adapter npm_dependencies (RFC 0001) merged into the consumer's package.json
+    const pkg = JSON.parse(await readFile(path.join(repo, "package.json"), "utf8")) as {
+      dependencies?: Record<string, string>;
+    };
+    expect(pkg.dependencies?.["stripe"]).toBeDefined();
+
+    // owns tables → flagged to run partkit migrate
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("billing.subscription@1.0.0");
+
+    // verify requires the declared dep installed in-range (RFC 0001 §2b); simulate
+    // a consumer install at the attestation-pinned version. `requires: auth.session`
+    // is resolver-only — verify does not need auth.session present.
+    await mkdir(path.join(repo, "node_modules", "stripe"), { recursive: true });
+    await writeFile(
+      path.join(repo, "node_modules", "stripe", "package.json"),
+      JSON.stringify({ name: "stripe", version: "22.2.1" }),
+    );
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

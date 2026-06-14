@@ -1,0 +1,34 @@
+{
+  "capability": "billing.subscription",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Subscription billing through a contract-stable interface: hosted checkout, a webhook-derived subscription mirror, cancel/reactivate/change-plan, and entitlement — with pluggable, attested payment-vendor adapters.",
+  "interface": {
+    "exports": [
+      "billing(db: SqlExecutor): Billing",
+      "Billing { createCheckout(input): Promise<CheckoutSession>; getSubscription(userId): Promise<Subscription | null>; cancelAtPeriodEnd(input): Promise<Subscription>; reactivate(input): Promise<Subscription>; changePlan(input): Promise<Subscription>; ingestWebhook(input): Promise<IngestResult>; onSubscriptionChange(handler): Unsubscribe }",
+      "billingWebhookHandler(db: SqlExecutor): (request: Request) => Promise<Response>",
+      "class BillingError extends Error { code: BillingErrorCode }"
+    ],
+    "events": [
+      "subscription.created",
+      "subscription.updated",
+      "subscription.canceled",
+      "payment.failed"
+    ],
+    "http_routes": [
+      { "route": "POST /api/webhooks/billing", "export": "billingWebhookHandler" }
+    ]
+  },
+  "invariants": [
+    "Importing performs no I/O and never throws; configuration is validated at call time with typed errors and secrets redacted.",
+    "Invalid input fails fast with a typed error and zero side effects.",
+    "Inbound webhook handling is idempotent under at-least-once delivery (dedupe by vendor event id).",
+    "Subscription state derives solely from verified webhook events, never from client input.",
+    "Inbound webhooks are verified (timing-safe signature over the raw bytes, with a bounded timestamp window) before any state change.",
+    "No card data is ever stored or logged.",
+    "The part writes only its own billing_ tables and references the principal by opaque user_id.",
+    "Entitlement is exactly status in {active, trialing}."
+  ],
+  "notes": "v1 scope is checkout + subscription lifecycle + entitlement, with the stripe adapter attested. Inbound webhook verification is the part's own (raw-HMAC); composing on webhooks.ingest is a future option. Dunning email (composing on email.transactional) is deferred to a future minor. Additional vendor adapters (paddle, lemonsqueezy) are interchangeable by construction against this capability."
+}

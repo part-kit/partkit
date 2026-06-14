@@ -12,6 +12,7 @@ Infrastructure capabilities in this repo come from the PartKit registry.
 - Each installed part documents exactly what you must write in \`parts/<name>/seams.md\`. Write only the seams.
 - Import ONLY \`parts/<name>/src/index\` — deep imports (\`src/internal/\`, \`adapters/\`) are guard failures: they couple you to interiors the attestation never promised.
 - If a type error points inside \`parts/**\`, the fix is on YOUR side of the seam. Restore with \`git checkout HEAD -- parts/\` and re-read that part's seams.md.
+- When you finish a task, run \`partkit audit\` — it must be green. It checks the boundary held, attestations are intact, and each part's routes and env are wired; warnings (e.g. hand-rolled infrastructure a part already covers) tell you to reach for a part instead.
 
 ## Installed parts
 ${PARTS_START}
@@ -60,8 +61,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: boundary guard (the control against accident)
-        run: npx --yes partkit guard
-      - name: attestation verification (the control against malice)
-        run: npx --yes partkit verify
+      - name: audit (boundary + attestations + wiring)
+        run: npx --yes partkit audit
 `;
