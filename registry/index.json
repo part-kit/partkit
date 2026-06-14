@@ -116,6 +116,15 @@
       "provides": [
         "webhooks.dispatch@1"
       ]
+    },
+    "billing.usage": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "billing.usage@1"
+      ]
     }
   }
 }

@@ -1,0 +1,25 @@
+{
+  "capability": "billing.usage",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Vendor-neutral metered-usage ledger — record consumption events idempotently, aggregate per subject/meter/period, and report unreported usage to a biller (Stripe Meters) out-of-band. The ledger is the source of truth; the biller is an adapter.",
+  "interface": {
+    "exports": [
+      "usage(db: SqlExecutor): UsageMeter",
+      "UsageMeter { record(input: RecordUsageInput): Promise<RecordedUsage>; total(query: UsageTotalQuery): Promise<UsageTotal>; summary(query: UsageSummaryQuery): Promise<UsageTotal[]>; reportDue(opts?: ReportDueOptions): Promise<UsageReport> }",
+      "class UsageError extends Error { code: UsageErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; record/total/summary validate input with typed errors, and record NEVER calls the biller inline — it only writes the local ledger, so a biller outage never blocks or fails metering",
+    "record is idempotent: the same idempotencyKey (per subject+meter) yields exactly one ledger row; the second call returns deduped:true with the original eventId. A non-finite or negative quantity is rejected before any SQL",
+    "total and summary aggregate correctly over the half-open [since, until) window (since-inclusive, until-exclusive), honor the subject/meter filters, and are deterministic; an empty range yields a zero total, not an error",
+    "Reporting is at-least-once toward the biller, deduplicated by the stable eventId (exactly-once within the biller's dedup window): reportDue reports each unreported event using its eventId as the biller idempotency key, then marks it reported; a biller failure leaves the event unreported for the next pass — never silently dropped — and a permanently-rejected event sinks in the drain order so it never starves fresh usage",
+    "Quantities round-trip exactly for integer units (no float drift); decimal handling is documented in seams.md",
+    "The biller secret never appears in error messages, in UsageError, or in any value the part returns",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement targets only its own billing_usage_events table; every input is parameterized, so SQL metacharacters are stored literally and never executed"
+  ],
+  "notes": "The last of the Wave 2 trio (after auth.apikey + webhooks.dispatch) that makes the AI-app / API-product skeleton (App Pack ai-api) assemblable. Specified by RFC 0005 (the capability was already in the docs/02 namespace). Vendor-neutral LEDGER core (zero-dep, owns billing_usage_events) + a Stripe Meters reporting adapter (per-adapter npm_dependencies stripe, RFC 0001). record() is enqueue-only and idempotent (ON CONFLICT (subject_id, meter, idempotency_key) DO NOTHING); total/summary aggregate over a half-open window; reportDue drains reported_at IS NULL rows to the biller exactly-once (the stable eventId is Stripe's meter-event identifier), report-before-mark, mirroring webhooks.dispatch.deliverDue — composes with jobs.queue or a plain cron, NO requires edge. quantity is NUMERIC (exact integers + decimals; node-postgres returns it as a string; the adapter reports the exact string not a rounded double). subjectId is opaque (customer/org id OR an auth.apikey id). Conformance: ledger idempotency/aggregation/injection vs real Postgres (gated PARTKIT_TEST_DATABASE_URL), the reportDue drain state-machine vs a fake recorder, and the stripe adapter vs the REAL Stripe test API (gated STRIPE_TEST_SECRET_KEY) — record meter events then poll listEventSummaries for the eventually-consistent aggregate; validation/redaction/own-table run DB-free. The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

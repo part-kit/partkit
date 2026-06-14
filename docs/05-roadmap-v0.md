@@ -123,6 +123,27 @@ before publish — incl. the keep-alive-pool SSRF bypass, the slow-trickle hang,
 that the native `blockList` option isn't honored for https. **`billing.usage` is the last
 Wave 2 part the `ai-api` pack needs.**
 
+**Wave 2 — `billing.usage` shipped 1.0.0 (2026-06-14), completing the `ai-api`
+trio.** The vendor-neutral metered-usage **ledger** (RFC 0005): `record` events
+idempotently into a part-owned table (fast + local, **never** calls the biller
+inline), `total`/`summary` aggregate over a half-open `[since, until)` window, and
+`reportDue` drains unreported events to a biller out-of-band. Zero-dependency core
+(node:crypto + SQL); a **Stripe Meters** adapter (per-adapter `stripe` dep) reports
+each event with its stable `eventId` as Stripe's `identifier` — exactly-once,
+report-before-mark, so a re-run dedupes and an outage never drops a bill. The
+ledger is the source of truth (invoice from it yourself, or push to Stripe); no
+`requires` edge — `reportDue` composes with `jobs.queue` or a cron. `quantity` is
+`NUMERIC` (exact integers + decimals; the adapter reports the exact string, never
+a rounded double). `subjectId` is opaque (a customer id or an `auth.apikey` id).
+14 conformance tests — ledger idempotency/aggregation/injection vs real Postgres,
+the drain state-machine vs a fake recorder, and the **real Stripe test API**
+(record meter events → poll `listEventSummaries` for the eventually-consistent
+aggregate); a 5-lens adversarial review ran before publish.
+
+**The `ai-api` skeleton is now assemblable from verified parts: `auth.apikey` +
+`billing.usage` + `webhooks.dispatch` are all shipped** (plus the shared core).
+The pack manifest can drop its "not installable yet" gate once re-mirrored.
+
 **A skeleton is "done well"** — the standard a team actually adopts — only when
 an assembled app demonstrates four things in the running product, not just in
 tests: it is **robust** (the security exhibits are live — `429`, replay/tamper

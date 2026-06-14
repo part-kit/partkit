@@ -1,0 +1,110 @@
+{
+  "manifest_version": 1,
+  "part": "billing.usage",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "15d45aab40fca500c3b8a3a8506c7760b72ed96b6cea7126ea4280754ca775ee",
+      "bytes": 7424
+    },
+    {
+      "path": "adapters/stripe/adapter.ts",
+      "sha256": "09d3e02b357427cd5be361b5ac116fb898c2a691d621b8bdc0ecbcc0f99088d8",
+      "bytes": 3632
+    },
+    {
+      "path": "conformance/fake-recorder.ts",
+      "sha256": "54111fc0e1e53dc3c691accacff88050ae5a56b8e1a8566387f8d7cd6441ef95",
+      "bytes": 952
+    },
+    {
+      "path": "conformance/package.json",
+      "sha256": "5e0f334aa6c4585c85f4eaff9b1bef22e57ddf25bd4d8500193fc75671cc24ec",
+      "bytes": 492
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "ad26f6fe4296c658200e3aca8c23674d8b9a8a67552a6a98e974e9aea4ab5f65",
+      "bytes": 1172
+    },
+    {
+      "path": "conformance/usage.test.ts",
+      "sha256": "4922a249f74318fc650f0066afa16f228f2b68948074c17449c8451510654e43",
+      "bytes": 18556
+    },
+    {
+      "path": "contract.json",
+      "sha256": "d0e7591c560b2941b85075a7a969b84da0c875ee67ffe656da54e971ba1efab8",
+      "bytes": 3610
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "6bfab4bcc583abd00d89accf8bcdbe253d92a72cac6447f67cd97aaa661af6df",
+      "bytes": 834
+    },
+    {
+      "path": "examples/record-usage.ts",
+      "sha256": "081a8d7b3cf10750b2b087475e5937a33bdb1d6c994efa0186d74647c9ffe85c",
+      "bytes": 1456
+    },
+    {
+      "path": "examples/report-wiring.ts",
+      "sha256": "2cdc108bf16f03f6ac70357e964e2fdad01ac29f6a1e02c998945c0d054b7bc0",
+      "bytes": 1660
+    },
+    {
+      "path": "migrations/001-create-usage-tables.sql",
+      "sha256": "dbb10a3901b077c5e88f437edbb6ce17b85a3c61a99f525b038dffdf56a309ca",
+      "bytes": 2585
+    },
+    {
+      "path": "seams.md",
+      "sha256": "9b6a349834c5c3eec43f104d6ad06624b7205e25fddbef92d450b90a982d4c82",
+      "bytes": 6157
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "dec4aa050beff1fcbea35a37302990b054da503562f8fe244e1d8529eb51d576",
+      "bytes": 1593
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "2c59ccce23a242f942a9c4a550e06571c06315d8e0ffc60a6c68ca045af445d9",
+      "bytes": 1209
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "36062cd8675779296666b1427a4c6cccb5d85038b2da4736df949b31f42afc1a",
+      "bytes": 726
+    },
+    {
+      "path": "src/internal/ids.ts",
+      "sha256": "56231db8010fe7615fb1013fe8fa122c07985ebab3c0ab2529514426a587b5b7",
+      "bytes": 365
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "73885d47c62fd5aed8b998b25f90052a59a8b2398ece346fc6533663709d76bf",
+      "bytes": 3910
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "8332a6f2bdae5ccaa5d04132299fd29607cc42f66ea4fa6d44333a98010b93b5",
+      "bytes": 3612
+    },
+    {
+      "path": "src/internal/usage.ts",
+      "sha256": "b83963b9cbcbddabd46d6e9a88a3079a44f5f19b6dea69c4e3a2aa0b378b6c88",
+      "bytes": 5813
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "13551e83477ba85ac53de4688c989cd18cf22ad053f35d8fb5e13ca32a8f838f",
+      "bytes": 4964
+    }
+  ],
+  "attestations": [
+    "stripe"
+  ]
+}

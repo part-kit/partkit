@@ -581,3 +581,54 @@ describe("real registry: webhooks.dispatch installs end-to-end (outbound signed 
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: billing.usage installs end-to-end (metered-usage ledger; stripe Meters adapter)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    // the stripe adapter declares stripe in its npm_dependencies → needs a package.json.
+    await writeFile(path.join(repo, "package.json"), JSON.stringify({ name: "app", version: "0.0.0" }));
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("auto-selects the single stripe adapter, merges stripe, vendors the migration, verifies green", async () => {
+    const res = await addPart(repo, { name: "billing.usage" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBe("stripe"); // one installable adapter → auto-selected
+    expect(res.envKeys).toEqual(expect.arrayContaining(["BILLING_USAGE_SECRET_KEY"]));
+
+    await stat(path.join(repo, "parts/billing.usage/src/index.ts"));
+    await stat(path.join(repo, "parts/billing.usage/adapters/selected/adapter.ts"));
+    await stat(path.join(repo, "parts/billing.usage/seams.md"));
+    await stat(path.join(repo, "parts/billing.usage/examples/record-usage.ts"));
+    await stat(path.join(repo, "parts/billing.usage/migrations/001-create-usage-tables.sql"));
+    await stat(path.join(repo, "parts/billing.usage/ATTESTATION.json"));
+    // only the selected adapter is vendored
+    await expect(stat(path.join(repo, "parts/billing.usage/adapters/stripe"))).rejects.toThrow();
+
+    // per-adapter npm_dependencies (RFC 0001) merged into the consumer's package.json
+    const pkg = JSON.parse(await readFile(path.join(repo, "package.json"), "utf8")) as {
+      dependencies?: Record<string, string>;
+    };
+    expect(pkg.dependencies?.["stripe"]).toBeDefined();
+
+    // owns a table → flagged to run partkit migrate
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("billing.usage@1.0.0");
+
+    // verify requires the declared dep installed in-range (RFC 0001 §2b).
+    await mkdir(path.join(repo, "node_modules", "stripe"), { recursive: true });
+    await writeFile(
+      path.join(repo, "node_modules", "stripe", "package.json"),
+      JSON.stringify({ name: "stripe", version: "22.2.1" }),
+    );
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

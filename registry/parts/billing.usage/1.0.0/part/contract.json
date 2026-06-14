@@ -1,0 +1,66 @@
+{
+  "part": "billing.usage",
+  "version": "1.0.0",
+  "contract_version": "0.2",
+  "provides": [
+    "billing.usage@1"
+  ],
+  "requires": [],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "adapters": [
+    {
+      "name": "stripe",
+      "vendor_api": "2026-05-27.dahlia",
+      "status": "attested",
+      "npm_dependencies": { "stripe": "^22" }
+    }
+  ],
+  "interface": {
+    "exports": [
+      "usage(db: SqlExecutor): UsageMeter",
+      "UsageMeter { record(input: RecordUsageInput): Promise<RecordedUsage>; total(query: UsageTotalQuery): Promise<UsageTotal>; summary(query: UsageSummaryQuery): Promise<UsageTotal[]>; reportDue(opts?: ReportDueOptions): Promise<UsageReport> }",
+      "class UsageError extends Error { code: UsageErrorCode }",
+      "types: SqlExecutor, UsageMeter, RecordUsageInput, RecordedUsage, UsageTotalQuery, UsageSummaryQuery, UsageTotal, ReportDueOptions, UsageReport, UsageErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {
+    "BILLING_USAGE_SECRET_KEY": { "required": false, "secret": true }
+  },
+  "data_ownership": {
+    "tables": ["billing_usage_events"],
+    "writes_only_own_tables": true,
+    "reads": {
+      "billing_usage_events": {
+        "label": "Usage events",
+        "primary_key": "id",
+        "order_by": "created_at desc",
+        "columns": [
+          { "name": "id", "type": "string" },
+          { "name": "subject_id", "type": "string", "label": "Subject" },
+          { "name": "meter", "type": "string", "label": "Meter" },
+          { "name": "quantity", "type": "number", "label": "Quantity" },
+          { "name": "occurred_at", "type": "timestamp", "label": "Occurred" },
+          { "name": "reported_at", "type": "timestamp", "label": "Reported" },
+          { "name": "created_at", "type": "timestamp", "label": "Recorded" }
+        ]
+      }
+    }
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; record/total/summary validate input with typed errors, and record NEVER calls the biller inline — it only writes the local ledger, so a biller outage never blocks or fails metering",
+    "record is idempotent: the same idempotencyKey (per subject+meter) yields exactly one ledger row; the second call returns deduped:true with the original eventId. A non-finite or negative quantity is rejected before any SQL",
+    "total and summary aggregate correctly over the half-open [since, until) window (since-inclusive, until-exclusive), honor the subject/meter filters, and are deterministic; an empty range yields a zero total, not an error",
+    "Reporting is at-least-once toward the biller, deduplicated by the stable eventId (exactly-once within the biller's dedup window): reportDue reports each unreported event using its eventId as the biller idempotency key, then marks it reported; a biller failure leaves the event unreported for the next pass — never silently dropped — and a permanently-rejected event sinks in the drain order so it never starves fresh usage",
+    "Quantities round-trip exactly for integer units (no float drift); decimal handling is documented in seams.md",
+    "The biller secret never appears in error messages, in UsageError, or in any value the part returns",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement targets only its own billing_usage_events table; every input is parameterized, so SQL metacharacters are stored literally and never executed"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}
