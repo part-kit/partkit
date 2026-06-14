@@ -30,5 +30,5 @@
     "The part writes only its own billing_ tables and references the principal by opaque user_id.",
     "Entitlement is exactly status in {active, trialing}."
   ],
-  "notes": "v1 scope is checkout + subscription lifecycle + entitlement, with the stripe adapter attested. Inbound webhook verification is the part's own (raw-HMAC); composing on webhooks.ingest is a future option. Dunning email (composing on email.transactional) is deferred to a future minor. Additional vendor adapters (paddle, lemonsqueezy) are interchangeable by construction against this capability."
+  "notes": "v1 scope is checkout + subscription lifecycle + entitlement, with the stripe AND paddle adapters attested (paddle added in billing.subscription 1.1.0 — the real, attested vendor-flip). Inbound webhook verification is the part's own (raw-HMAC, per-vendor wire format selected by the adapter's webhookSignatureHeader); composing on webhooks.ingest is a future option. Dunning email (composing on email.transactional) is deferred to a future minor. Further vendor adapters (lemonsqueezy, etc.) are interchangeable by construction against this capability."
 }

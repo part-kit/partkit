@@ -1,0 +1,4 @@
+{
+  "//": "Test-only dependencies (docs/07 §2). sms.transactional is stateless and both adapters are zero-dependency (REST + hand-signed SigV4, no aws-sdk), so conformance needs no extra packages — the suite drives a protocol-faithful fake HTTP server over node:http. Declared from this first version because conformance/ is part of the content hash.",
+  "devDependencies": {}
+}

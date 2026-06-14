@@ -1,0 +1,17 @@
+{
+  "part": "auth.session",
+  "version": "1.1.0",
+  "adapter": null,
+  "content_hash": "sha256:68a1d247be6b17ac4d8614f4ff1cae28b7747aab960179f410bc3ec26528f0bb",
+  "verified_at": "2026-06-14T13:39:51.199Z",
+  "dependency_matrix": {
+    "node": "25.3.0",
+    "npm:better-auth": "1.6.18",
+    "npm:pg": "8.21.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 9,
+  "result_hash": "sha256:1a1cc29cbcba60e1b14f60de0ff2aa591c2477f7ff5bddaaeef96e5e53a716fa",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T13:39:51.200Z"
+}

@@ -1,0 +1,56 @@
+{
+  "part": "auth.session",
+  "version": "1.1.0",
+  "contract_version": "0.2",
+  "provides": ["auth.session@1"],
+  "requires": [],
+  "platform": { "node": ">=22", "postgres": ">=14" },
+  "npm_dependencies": {
+    "better-auth": "^1.6.0",
+    "pg": "^8.0.0"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "authHandler(request: Request): Promise<Response>",
+      "getSession(headers: Headers): Promise<SessionResult | null>",
+      "requireSession(headers: Headers): Promise<SessionResult>",
+      "signUp(input: SignUpInput): Promise<AuthResult>",
+      "signIn(input: SignInInput): Promise<AuthResult>",
+      "signOut(headers: Headers): Promise<void>",
+      "class AuthError extends Error { code: AuthErrorCode }",
+      "types: AuthUser, AuthSession, SessionResult, AuthResult, SignUpInput, SignInInput, AuthErrorCode"
+    ],
+    "events": [],
+    "http_routes": [
+      { "route": "GET /api/auth/[...all]", "export": "authHandler" },
+      { "route": "POST /api/auth/[...all]", "export": "authHandler" }
+    ]
+  },
+  "env": {
+    "BETTER_AUTH_SECRET": { "required": true, "secret": true },
+    "AUTH_DATABASE_URL": { "required": true, "secret": true },
+    "BETTER_AUTH_URL": { "required": true },
+    "GOOGLE_CLIENT_ID": { "required": false },
+    "GOOGLE_CLIENT_SECRET": { "required": false, "secret": true },
+    "GITHUB_CLIENT_ID": { "required": false },
+    "GITHUB_CLIENT_SECRET": { "required": false, "secret": true }
+  },
+  "data_ownership": {
+    "tables": ["auth_user", "auth_session", "auth_account", "auth_verification"],
+    "writes_only_own_tables": true
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration (secret, database URL, base URL) is validated lazily at first use with typed errors",
+    "signUp creates a user and an active session; the password is stored only as a hash in auth_account (never plaintext), and a duplicate email is rejected with a typed error",
+    "signIn with valid credentials issues a session that getSession resolves; an unknown email or a wrong password is rejected with the same typed error (no account enumeration)",
+    "getSession returns the authenticated user and session for a valid session token and null for a missing, malformed, or expired one; requireSession throws a typed AuthError when there is no valid session",
+    "signOut invalidates the session so the same token no longer resolves",
+    "authHandler is a mountable fetch handler that serves the auth routes; importing or constructing it performs no I/O",
+    "The part owns only the auth_* tables and surfaces every failure as a typed AuthError — Better Auth's internal errors never escape raw, and secrets never appear in messages",
+    "Social sign-in is opt-in by env: a provider (google, github) is enabled only when BOTH its client id and secret are set; the mounted handler then serves that provider's sign-in/callback routes and links the account in auth_account. No provider is configured by default, and an unconfigured provider is rejected rather than silently attempted"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

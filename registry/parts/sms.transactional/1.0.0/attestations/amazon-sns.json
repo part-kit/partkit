@@ -1,0 +1,15 @@
+{
+  "part": "sms.transactional",
+  "version": "1.0.0",
+  "adapter": "amazon-sns",
+  "content_hash": "sha256:137c7eab5be00423311fc2f62354197fb3a608cb231fc12bdf4281964a90293c",
+  "verified_at": "2026-06-14T13:30:12.790Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 12,
+  "result_hash": "sha256:0a14491cd19cfcce51fe3734bf7f2763aed32b3e99ae2f7e2a74d21c14563cc6",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T13:30:12.790Z"
+}

@@ -1,0 +1,15 @@
+{
+  "part": "sms.transactional",
+  "version": "1.0.0",
+  "adapter": "twilio",
+  "content_hash": "sha256:6db47d97b134f36a872ebfca072eb98fecc32970a11c08abc2f51b54b93554af",
+  "verified_at": "2026-06-14T13:30:10.146Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 15,
+  "result_hash": "sha256:369377eed14668e67fa20d7930f7c0291c017c6dcaa0a32154bd854feef1863e",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T13:30:10.147Z"
+}

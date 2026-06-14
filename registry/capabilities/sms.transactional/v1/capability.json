@@ -1,0 +1,23 @@
+{
+  "capability": "sms.transactional",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Send a transactional SMS through a contract-stable, vendor-neutral interface — E.164 recipient, a plain-text body, transient-retry, typed errors — with pluggable, attested vendor adapters.",
+  "interface": {
+    "exports": [
+      "send(message: SmsMessage): Promise<SendResult>",
+      "class SmsError extends Error { code: SmsErrorCode; retryable: boolean; status: number | null }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing performs no I/O and never throws; configuration is validated at call time with typed errors.",
+    "An invalid message fails fast with a typed error and zero network calls (recipient must be E.164, body non-empty).",
+    "Disallowed control characters in the body or sender are rejected before any send.",
+    "Transient vendor failures (429, 5xx, network) are retried up to 3 attempts with backoff + jitter; permanent failures are never retried.",
+    "All failures surface as typed SmsError values; raw vendor responses never escape the part.",
+    "Secret values never appear in error messages."
+  ],
+  "notes": "The SMS twin of email.transactional and its second worked vendor-flip: twilio (one Basic-auth REST call — the easy/expensive vendor an agent reaches for) vs amazon-sns (SigV4-signed Publish — the fiddly/cheaper one), a one-command flip. Both adapters are zero-dependency (REST + hand-signing, no aws-sdk); the SNS adapter reuses the SES SigV4 signer with service=sns. Stateless (no DB, no migrations). SMS pricing carries carrier/segment fees — quote per-segment with a date stamp, never a hard monthly figure; the flip is one commit in code, but provisioning (Twilio number / SNS sandbox exit + 10DLC/sender-ID registration) stays the founder's. Further adapters (Vonage, MessageBird, Plivo) are interchangeable by construction."
+}

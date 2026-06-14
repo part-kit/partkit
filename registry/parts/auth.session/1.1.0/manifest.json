@@ -1,0 +1,75 @@
+{
+  "manifest_version": 1,
+  "part": "auth.session",
+  "version": "1.1.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "fd55ea1bb5bcfca094158d8e95071cc9409b778fcea945f183f7453740598773",
+      "bytes": 7719
+    },
+    {
+      "path": "conformance/auth.test.ts",
+      "sha256": "6b058e4a88488152a1a6a7290e533cca3ad124249d776c04bbb96a94dfa3a09b",
+      "bytes": 9885
+    },
+    {
+      "path": "contract.json",
+      "sha256": "abb73d8649b7f94943296ddc2603ac33afc6d3378e4f93bf62c67c3834e0e547",
+      "bytes": 3170
+    },
+    {
+      "path": "examples/auth-route.ts",
+      "sha256": "ce769b70c360fbe73b5172bd351b2a76a401c7f377d908d3d50e6a60ada4c3bb",
+      "bytes": 673
+    },
+    {
+      "path": "examples/protect-page.ts",
+      "sha256": "2fc2123d20d286fd83cc671a95f0eaaa90b503e3deca1a576b42d71852819e38",
+      "bytes": 1125
+    },
+    {
+      "path": "migrations/001-create-auth-tables.sql",
+      "sha256": "f0a29424c169e47db0228894c7bc17cc2c37f69b1c578083d1d78dac090ad715",
+      "bytes": 2486
+    },
+    {
+      "path": "migrations/1.0.0-1.1.0/seam-changes.md",
+      "sha256": "9fd8d4ee4113805cffd9ef95dccf6f554c97a16fdb78195d12647d531aad1b4b",
+      "bytes": 881
+    },
+    {
+      "path": "seams.md",
+      "sha256": "ef9b017164746f743da3fe5882376bf83b5666bc8d665b6bf84c6b3dcbe571a4",
+      "bytes": 5414
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "6a268a4d169491aa62dac040035afed53f1eec1fca02906549c4219e8c424240",
+      "bytes": 4156
+    },
+    {
+      "path": "src/internal/auth.ts",
+      "sha256": "9874ce765bb32f006d8d17f29175533f60bf239217615b33e567b923f2a2f9e9",
+      "bytes": 5266
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "62f8786ab551765db104d3c4a02716b92425ed7040c94bf4637d6b206208a6e7",
+      "bytes": 1533
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "7f64bdcfaadd5ba669bc71ff9cabc9871e14eb39e3e1e80aa0228213f0e0a955",
+      "bytes": 929
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "8ce105fe95f7067d6fcc0454679a60bb7121fae0908aede0e8aa87f46963822e",
+      "bytes": 1115
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

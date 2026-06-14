@@ -1,0 +1,101 @@
+{
+  "manifest_version": 1,
+  "part": "sms.transactional",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "f6333302e5f97869cadc0b4afc78f3f1f818beba112f956a8e990373823acfc1",
+      "bytes": 5497
+    },
+    {
+      "path": "adapters/amazon-sns/adapter.ts",
+      "sha256": "6d0ff00c06e4281a10c2a5c1f5eac6ab47f9a109af7ca460ffd99493a69d5add",
+      "bytes": 2680
+    },
+    {
+      "path": "adapters/twilio/adapter.ts",
+      "sha256": "d833cc11901bcdf5e7ce7697e24db3cb946ff01710d917fb4aa9c02209a418a8",
+      "bytes": 2451
+    },
+    {
+      "path": "conformance/fake-vendor.ts",
+      "sha256": "b4c94d06498b98a28d895b114f790eb836de36edd9dc0eb4c104d245aec4200c",
+      "bytes": 3387
+    },
+    {
+      "path": "conformance/package.json",
+      "sha256": "bc5e79989a762d71fa6fef1830fff5867962c4361a6e5fe87e0b051ceaca894b",
+      "bytes": 382
+    },
+    {
+      "path": "conformance/send.test.ts",
+      "sha256": "10274a0d42f541a8fdaefa762b3949f9f9e461d8ecd890a4179781c33ea05f31",
+      "bytes": 12513
+    },
+    {
+      "path": "contract.json",
+      "sha256": "599bf99b0991288d6dfc34df4c3d9c2ee47c047625b27987a3cc84bfb0ee78da",
+      "bytes": 2034
+    },
+    {
+      "path": "examples/send-sms.ts",
+      "sha256": "b0ca8fd37d31c1c62ca952e49c64029f28a239acefd22cf9108895d0b4bc1506",
+      "bytes": 781
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "seams.md",
+      "sha256": "aa56d74c5b3e8a01c2ff403178cbad9b50a956854a82493e0264339f503bed22",
+      "bytes": 4586
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "95a9707d1e44bba1e5ac9bdfbb71bfd846ef48d84db98a9996ac6dcdf4d95dd1",
+      "bytes": 2140
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "098d2f9646c16a0cd95fbe1ba96438fee51f775f0e303add423db85450ef9ba6",
+      "bytes": 857
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "4b2fb2d8531d134e31d4cf82b93c1677161c38626a8e3fa52863a1cb541813c1",
+      "bytes": 1979
+    },
+    {
+      "path": "src/internal/redact.ts",
+      "sha256": "2ae165a8650a6383137563a3bb4e325673fd18cc78b335e3af9fcc00f9426f5e",
+      "bytes": 588
+    },
+    {
+      "path": "src/internal/retry.ts",
+      "sha256": "96be7204b47dd53afd7dcaaac6c5564ccaa3b682c30bba3c4a640528d613cfd8",
+      "bytes": 941
+    },
+    {
+      "path": "src/internal/sigv4.ts",
+      "sha256": "4cb50160266cb15333a55febbd924073d7bec65465e78bad212cb01b2abfc6b9",
+      "bytes": 3050
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "0c33d5f1880d6dd217df1b3bbc411e3b4b58a00adc2739e7c76ee87ba54479b6",
+      "bytes": 1021
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "dcd259f2022329889805dc36e66ee2454dc8d9d307b9e3682ed4ab508bde4304",
+      "bytes": 2340
+    }
+  ],
+  "attestations": [
+    "amazon-sns",
+    "twilio"
+  ]
+}

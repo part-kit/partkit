@@ -1,0 +1,15 @@
+{
+  "part": "billing.subscription",
+  "version": "1.1.0",
+  "adapter": "paddle",
+  "content_hash": "sha256:b33f2fc7cc494cf0aa86eb2bc80094f48d18dc6a40c7eebf006af29f47e9af31",
+  "verified_at": "2026-06-14T13:08:00.431Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 33,
+  "result_hash": "sha256:c1fa406c659e27a4cfd7a0ca76cbc289a78b01d31e0f0bb73494e33f88fbc106",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T13:08:00.431Z"
+}

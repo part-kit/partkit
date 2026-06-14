@@ -1,0 +1,74 @@
+{
+  "part": "sms.transactional",
+  "version": "1.0.0",
+  "contract_version": "0.1",
+  "provides": [
+    "sms.transactional@1"
+  ],
+  "requires": [],
+  "platform": {
+    "node": ">=22"
+  },
+  "adapters": [
+    {
+      "name": "twilio",
+      "vendor_api": "2010-04-01",
+      "status": "attested"
+    },
+    {
+      "name": "amazon-sns",
+      "vendor_api": "2010-03-31",
+      "status": "attested"
+    }
+  ],
+  "interface": {
+    "exports": [
+      "send(message: SmsMessage): Promise<SendResult>",
+      "class SmsError extends Error { code: SmsErrorCode; retryable: boolean; status: number | null }",
+      "types: SmsMessage, SendResult, SmsErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {
+    "SMS_ADAPTER": {
+      "required": true,
+      "enum": [
+        "twilio",
+        "amazon-sns"
+      ]
+    },
+    "TWILIO_ACCOUNT_SID": {
+      "required": false
+    },
+    "TWILIO_AUTH_TOKEN": {
+      "required": false,
+      "secret": true
+    },
+    "TWILIO_FROM": {
+      "required": false
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "required": false,
+      "secret": true
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "required": false,
+      "secret": true
+    },
+    "AWS_REGION": {
+      "required": false
+    }
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; configuration is validated at call time with typed errors",
+    "An invalid message fails fast with a typed error and zero network calls — the recipient must be E.164 and the body non-empty",
+    "Disallowed control characters in the body or sender are rejected before send (injection/garbage defense)",
+    "Transient vendor failures (429, 5xx, network) are retried up to 3 attempts with exponential backoff and jitter; permanent failures are never retried",
+    "All failures surface as typed SmsError values; raw vendor responses never escape the part",
+    "Secret values never appear in error messages"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

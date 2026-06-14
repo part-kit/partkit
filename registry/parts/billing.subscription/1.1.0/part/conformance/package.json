@@ -1,0 +1,6 @@
+{
+  "//": "Test-only dependencies (docs/07 §2). The part's runtime dep is `stripe` (per-adapter npm_dependencies); conformance additionally opens a real pg connection to install migration 001 and inspect the billing_ tables. `pg` is a devDependency here — the isolated harness installs it as test toolchain and never pins it in the attestation (RFC 0001: runtime deps only). Declared from this FIRST version because conformance/ is part of the content hash.",
+  "devDependencies": {
+    "pg": "^8.0.0"
+  }
+}

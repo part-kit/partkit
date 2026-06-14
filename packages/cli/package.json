@@ -1,7 +1,7 @@
 {
   "name": "partkit",
-  "version": "0.3.0",
-  "description": "Verified, attested standard parts for AI coding agents \u2014 the CLI",
+  "version": "0.4.0",
+  "description": "Verified, attested standard parts for AI coding agents — the CLI",
   "type": "module",
   "license": "MIT",
   "homepage": "https://partkit.dev",

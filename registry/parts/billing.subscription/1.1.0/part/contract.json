@@ -1,0 +1,92 @@
+{
+  "part": "billing.subscription",
+  "version": "1.1.0",
+  "contract_version": "0.2",
+  "provides": ["billing.subscription@1"],
+  "requires": ["auth.session>=1"],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "adapters": [
+    {
+      "name": "stripe",
+      "vendor_api": "2026-05-27.dahlia",
+      "status": "attested",
+      "npm_dependencies": { "stripe": "^22" }
+    },
+    {
+      "name": "paddle",
+      "vendor_api": "paddle-billing-v1",
+      "status": "attested",
+      "npm_dependencies": {}
+    }
+  ],
+  "interface": {
+    "exports": [
+      "billing(db: SqlExecutor): Billing",
+      "Billing { createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession>; getSubscription(userId: string): Promise<Subscription | null>; cancelAtPeriodEnd(input: CancelInput): Promise<Subscription>; reactivate(input: CancelInput): Promise<Subscription>; changePlan(input: ChangePlanInput): Promise<Subscription>; ingestWebhook(input: IngestWebhookInput): Promise<IngestResult>; onSubscriptionChange(handler: SubscriptionChangeHandler): Unsubscribe; webhookHandler(): (request: Request) => Promise<Response> }",
+      "billingWebhookHandler(db: SqlExecutor): (request: Request) => Promise<Response>",
+      "class BillingError extends Error { code: BillingErrorCode }",
+      "types: SqlExecutor, Billing, Subscription, SubscriptionStatus, CheckoutSession, CreateCheckoutInput, CancelInput, ChangePlanInput, IngestWebhookInput, IngestResult, SubscriptionChangeHandler, SubscriptionChangeEvent, Unsubscribe, PlanCatalog, Plan, BillingErrorCode"
+    ],
+    "events": [
+      "subscription.created",
+      "subscription.updated",
+      "subscription.canceled",
+      "payment.failed"
+    ],
+    "http_routes": [
+      { "route": "POST /api/webhooks/billing", "export": "billingWebhookHandler" }
+    ]
+  },
+  "env": {
+    "BILLING_SECRET_KEY": { "required": true, "secret": true },
+    "BILLING_WEBHOOK_SECRET": { "required": true, "secret": true },
+    "BILLING_ADAPTER": { "required": false, "enum": ["stripe", "paddle"] }
+  },
+  "data_ownership": {
+    "tables": ["billing_subscriptions", "billing_events"],
+    "writes_only_own_tables": true,
+    "reads": {
+      "billing_subscriptions": {
+        "label": "Subscriptions",
+        "primary_key": "id",
+        "order_by": "created_at desc",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "user_id", "type": "string", "label": "User", "references_capability": "auth.session" },
+          { "name": "plan_id", "type": "string", "label": "Plan" },
+          { "name": "status", "type": "string", "label": "Status" },
+          { "name": "current_period_end", "type": "timestamp", "label": "Renews" },
+          { "name": "cancel_at_period_end", "type": "boolean", "label": "Cancels at period end" },
+          { "name": "created_at", "type": "timestamp", "label": "Created" }
+        ]
+      },
+      "billing_events": {
+        "label": "Billing events",
+        "primary_key": "id",
+        "order_by": "received_at desc",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "stripe_event_id", "type": "string", "label": "Vendor event" },
+          { "name": "type", "type": "string", "label": "Type" },
+          { "name": "received_at", "type": "timestamp", "label": "Received" }
+        ]
+      }
+    }
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; the Stripe client and DB access are built lazily on first use, and every failure (invalid input, a Stripe API error, or a storage error) surfaces as a typed BillingError whose message has every secret env value redacted, so a raw error carrying credentials never escapes.",
+    "Invalid input — a blank or unknown planId, an empty userId, or an unknown subscriptionId — fails fast with a typed BillingError (invalid_input or not_found) and issues zero SQL writes.",
+    "Inbound webhook handling is idempotent under at-least-once delivery: a UNIQUE constraint on billing_events.stripe_event_id means a redelivered event (same evt_ id) is recorded and applied at most once; reprocessing produces no second state change and no duplicate row.",
+    "Subscription state in billing_subscriptions derives solely from verified webhook events, never from client input or the success redirect: createCheckout writes no subscription row; only ingestWebhook, after signature verification, upserts billing_subscriptions.",
+    "Every inbound webhook is verified with a timing-safe HMAC-SHA256 over the raw request bytes (signed content '<t>.<rawbody>', key = BILLING_WEBHOOK_SECRET) before any state change; a tampered body, wrong secret, or absent/garbled signature header is rejected with BillingError(invalid_signature) and writes nothing, and a signed timestamp outside the +/-300s window is rejected with BillingError(timestamp_out_of_window).",
+    "No card data is ever stored or logged: billing_subscriptions and billing_events persist only Stripe identifiers, price id, status, period end, and event type/received_at — never card numbers, CVCs, or raw webhook payloads.",
+    "The part owns only the billing_ tables and never the principal: user identity is an opaque user_id with no foreign key to any auth.session table; every statement is fully parameterized so SQL metacharacters in ids are stored literally; every statement targets only billing_subscriptions or billing_events.",
+    "Entitlement is exactly status in {active, trialing}: getSubscription returns the mirrored row with a derived entitled flag true only for those two statuses; canceled, unpaid, past_due, incomplete, incomplete_expired, and paused are not entitled."
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

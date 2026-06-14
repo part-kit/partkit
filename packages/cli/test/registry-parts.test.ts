@@ -80,6 +80,73 @@ describe("real registry: email.transactional installs end-to-end", () => {
   });
 });
 
+describe("real registry: sms.transactional installs end-to-end (the SMS vendor-flip; zero-dep)", () => {
+  it("adds with --adapter=twilio, vendors the flattened adapter, scaffolds env, verifies green", async () => {
+    const repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+
+    const res = await addPart(repo, { name: "sms.transactional", adapter: "twilio" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBe("twilio");
+    expect(res.envKeys).toEqual(
+      expect.arrayContaining(["SMS_ADAPTER", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN"]),
+    );
+
+    await stat(path.join(repo, "parts/sms.transactional/src/index.ts"));
+    await stat(path.join(repo, "parts/sms.transactional/adapters/selected/adapter.ts"));
+    await stat(path.join(repo, "parts/sms.transactional/seams.md"));
+    await stat(path.join(repo, "parts/sms.transactional/examples/send-sms.ts"));
+    await stat(path.join(repo, "parts/sms.transactional/ATTESTATION.json"));
+    // only the flattened selected adapter is vendored
+    await expect(stat(path.join(repo, "parts/sms.transactional/adapters/twilio"))).rejects.toThrow();
+    await expect(stat(path.join(repo, "parts/sms.transactional/adapters/amazon-sns"))).rejects.toThrow();
+
+    const env = await readFile(path.join(repo, ".env.example"), "utf8");
+    expect(env).toContain("SMS_ADAPTER=twilio");
+    expect(env).toContain("TWILIO_AUTH_TOKEN=");
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("sms.transactional@1.0.0");
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+
+  it("the vendor-flip: --adapter=amazon-sns ships the vendored SigV4 signer, ZERO npm deps", async () => {
+    const repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await writeFile(path.join(repo, "package.json"), JSON.stringify({ name: "app", version: "0.0.0" }));
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+
+    const res = await addPart(repo, { name: "sms.transactional", adapter: "amazon-sns" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBe("amazon-sns");
+    expect(res.envKeys).toEqual(
+      expect.arrayContaining(["SMS_ADAPTER", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"]),
+    );
+
+    await stat(path.join(repo, "parts/sms.transactional/adapters/selected/adapter.ts"));
+    // SNS reuses the SES SigV4 signer, vendored as part interior (no aws-sdk)
+    await stat(path.join(repo, "parts/sms.transactional/src/internal/sigv4.ts"));
+
+    const env = await readFile(path.join(repo, ".env.example"), "utf8");
+    expect(env).toContain("SMS_ADAPTER=amazon-sns");
+    expect(env).toContain("AWS_SECRET_ACCESS_KEY=");
+
+    // both adapters are zero-dependency → nothing added to the consumer's deps
+    const pkg = JSON.parse(await readFile(path.join(repo, "package.json"), "utf8")) as {
+      dependencies?: Record<string, string>;
+    };
+    expect(pkg.dependencies ?? {}).toEqual({});
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});
+
 describe("real registry: webhooks.ingest installs end-to-end", () => {
   let repo: string;
 
@@ -250,7 +317,7 @@ describe("real registry: auth.session installs end-to-end (first OSS-wrapping pa
 
   it("adds with no adapter, merges npm_dependencies, vendors the migration + env, verifies green", async () => {
     const res = await addPart(repo, { name: "auth.session" });
-    expect(res.version).toBe("1.0.0");
+    expect(res.version).toBe("1.1.0");
     expect(res.adapter).toBeNull(); // wrapping a library is not an adapter axis
 
     await stat(path.join(repo, "parts/auth.session/src/index.ts"));
@@ -276,7 +343,7 @@ describe("real registry: auth.session installs end-to-end (first OSS-wrapping pa
     expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
-    expect(agents).toContain("auth.session@1.0.0");
+    expect(agents).toContain("auth.session@1.1.0");
 
     // verify requires the declared npm deps to be installed (RFC 0001 §2b);
     // simulate a consumer install at the attestation-pinned versions.
@@ -338,11 +405,11 @@ describe("real registry: auth.tenancy installs end-to-end (orgs/memberships/scop
     // auth.tenancy references auth.session's principal; the two are distinct
     // capabilities, so they coexist (no anti-sprawl conflict).
     const res = await addPart(repo, { name: "auth.session" });
-    expect(res.version).toBe("1.0.0");
+    expect(res.version).toBe("1.1.0");
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
     expect(agents).toContain("auth.tenancy@1.1.0");
-    expect(agents).toContain("auth.session@1.0.0");
+    expect(agents).toContain("auth.session@1.1.0");
 
     // verify requires auth.session's declared npm deps to be installed (RFC 0001
     // §2b); simulate a consumer install at the attestation-pinned versions.
@@ -447,7 +514,7 @@ describe("real registry: admin.crud installs end-to-end (RFC 0004; owns no table
   });
 });
 
-describe("real registry: billing.subscription installs end-to-end (stripe adapter; OSS-wrap + env + migration; requires auth.session)", () => {
+describe("real registry: billing.subscription installs end-to-end (stripe + paddle adapters; env + migration; requires auth.session)", () => {
   let repo: string;
 
   beforeAll(async () => {
@@ -459,10 +526,10 @@ describe("real registry: billing.subscription installs end-to-end (stripe adapte
     await initRepo(repo, { registrySource: REPO_REGISTRY });
   });
 
-  it("auto-selects the single stripe adapter, scaffolds env, merges stripe, vendors the migration, verifies green", async () => {
-    const res = await addPart(repo, { name: "billing.subscription" });
-    expect(res.version).toBe("1.0.0");
-    expect(res.adapter).toBe("stripe"); // one installable adapter → auto-selected
+  it("selects the stripe adapter, scaffolds env, merges stripe, vendors the migration, verifies green", async () => {
+    const res = await addPart(repo, { name: "billing.subscription", adapter: "stripe" });
+    expect(res.version).toBe("1.1.0");
+    expect(res.adapter).toBe("stripe"); // two attested adapters (stripe, paddle) → choose explicitly
     expect(res.envKeys).toEqual(expect.arrayContaining(["BILLING_SECRET_KEY", "BILLING_WEBHOOK_SECRET"]));
 
     await stat(path.join(repo, "parts/billing.subscription/src/index.ts"));
@@ -471,8 +538,9 @@ describe("real registry: billing.subscription installs end-to-end (stripe adapte
     await stat(path.join(repo, "parts/billing.subscription/examples/webhook-route.ts"));
     await stat(path.join(repo, "parts/billing.subscription/migrations/001-create-billing-tables.sql"));
     await stat(path.join(repo, "parts/billing.subscription/ATTESTATION.json"));
-    // only the selected adapter is vendored
+    // only the selected adapter is vendored (both source adapter dirs are flattened away)
     await expect(stat(path.join(repo, "parts/billing.subscription/adapters/stripe"))).rejects.toThrow();
+    await expect(stat(path.join(repo, "parts/billing.subscription/adapters/paddle"))).rejects.toThrow();
 
     const envExample = await readFile(path.join(repo, ".env.example"), "utf8");
     expect(envExample).toContain("BILLING_SECRET_KEY");
@@ -488,7 +556,7 @@ describe("real registry: billing.subscription installs end-to-end (stripe adapte
     expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
-    expect(agents).toContain("billing.subscription@1.0.0");
+    expect(agents).toContain("billing.subscription@1.1.0");
 
     // verify requires the declared dep installed in-range (RFC 0001 §2b); simulate
     // a consumer install at the attestation-pinned version. `requires: auth.session`
@@ -500,6 +568,37 @@ describe("real registry: billing.subscription installs end-to-end (stripe adapte
     );
 
     const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+
+  it("the vendor-flip: selecting the paddle adapter pulls ZERO npm deps and vendors only paddle", async () => {
+    const repo2 = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo2, { recursive: true });
+    execFileSync("git", ["init", "-q", repo2]);
+    await writeFile(path.join(repo2, "package.json"), JSON.stringify({ name: "app", version: "0.0.0" }));
+    await initRepo(repo2, { registrySource: REPO_REGISTRY });
+
+    const res = await addPart(repo2, { name: "billing.subscription", adapter: "paddle" });
+    expect(res.version).toBe("1.1.0");
+    expect(res.adapter).toBe("paddle");
+    // same vendor-neutral env as stripe — the interface is identical across the flip
+    expect(res.envKeys).toEqual(expect.arrayContaining(["BILLING_SECRET_KEY", "BILLING_WEBHOOK_SECRET"]));
+
+    await stat(path.join(repo2, "parts/billing.subscription/adapters/selected/adapter.ts"));
+    await stat(path.join(repo2, "parts/billing.subscription/migrations/001-create-billing-tables.sql"));
+    // neither source adapter dir survives materialization
+    await expect(stat(path.join(repo2, "parts/billing.subscription/adapters/stripe"))).rejects.toThrow();
+    await expect(stat(path.join(repo2, "parts/billing.subscription/adapters/paddle"))).rejects.toThrow();
+
+    // the paddle adapter is ZERO-dependency → no vendor SDK is added to the consumer
+    const pkg = JSON.parse(await readFile(path.join(repo2, "package.json"), "utf8")) as { dependencies?: Record<string, string> };
+    expect(pkg.dependencies?.["stripe"]).toBeUndefined();
+    expect(pkg.dependencies?.["@paddle/paddle-node-sdk"]).toBeUndefined();
+
+    const agents = await readFile(path.join(repo2, "AGENTS.md"), "utf8");
+    expect(agents).toContain("billing.subscription@1.1.0");
+
+    const ver = await verifyRepo(repo2);
     expect(ver.ok).toBe(true);
   });
 });

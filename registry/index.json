@@ -53,9 +53,10 @@
       ]
     },
     "auth.session": {
-      "latest": "1.0.0",
+      "latest": "1.1.0",
       "versions": [
-        "1.0.0"
+        "1.0.0",
+        "1.1.0"
       ],
       "provides": [
         "auth.session@1"
@@ -91,9 +92,10 @@
       ]
     },
     "billing.subscription": {
-      "latest": "1.0.0",
+      "latest": "1.1.0",
       "versions": [
-        "1.0.0"
+        "1.0.0",
+        "1.1.0"
       ],
       "provides": [
         "billing.subscription@1"
@@ -142,6 +144,15 @@
       ],
       "provides": [
         "search.fulltext@1"
+      ]
+    },
+    "sms.transactional": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "sms.transactional@1"
       ]
     }
   }
