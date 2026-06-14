@@ -15,7 +15,7 @@ fix our side or our seams, never the part. Wire each part only through its seams
 like our welcome-email template or plan catalog). Spend your effort on our UI and business logic;
 the infrastructure is already tested.
 
-Finish only when npx partkit verify && npx partkit guard are both green.
+Finish only when npx partkit audit is green.
 Stack: TypeScript, Node 22+, Next.js App Router, Postgres.`;
 
 export default function CopyPrompt() {

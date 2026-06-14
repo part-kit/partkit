@@ -26,7 +26,7 @@ describe("real registry: email.transactional installs end-to-end", () => {
 
   it("adds with --adapter=resend, vendors the flattened adapter, scaffolds env, verifies green", async () => {
     const res = await addPart(repo, { name: "email.transactional", adapter: "resend" });
-    expect(res.version).toBe("1.0.1");
+    expect(res.version).toBe("1.1.0");
     expect(res.adapter).toBe("resend");
 
     await stat(path.join(repo, "parts/email.transactional/src/index.ts"));
@@ -45,10 +45,38 @@ describe("real registry: email.transactional installs end-to-end", () => {
     expect(env).toContain("RESEND_API_KEY=");
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
-    expect(agents).toContain("email.transactional@1.0.1");
+    expect(agents).toContain("email.transactional@1.1.0");
 
     const ver = await verifyRepo(repo);
     expect(ver.ok).toBe(true); // dev-unsigned (and later staleness) are warnings, not failures
+  });
+
+  it("adds with --adapter=ses, scaffolds the AWS env + vendored SigV4 signer, verifies green", async () => {
+    const repo2 = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo2, { recursive: true });
+    execFileSync("git", ["init", "-q", repo2]);
+    await initRepo(repo2, { registrySource: REPO_REGISTRY });
+
+    const res = await addPart(repo2, { name: "email.transactional", adapter: "ses" });
+    expect(res.version).toBe("1.1.0");
+    expect(res.adapter).toBe("ses");
+    expect(res.envKeys).toEqual(
+      expect.arrayContaining(["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"]),
+    );
+
+    await stat(path.join(repo2, "parts/email.transactional/adapters/selected/adapter.ts"));
+    // the SES adapter's SigV4 signer ships as vendored interior (zero npm deps, no aws-sdk)
+    await stat(path.join(repo2, "parts/email.transactional/src/internal/sigv4.ts"));
+    await expect(
+      stat(path.join(repo2, "parts/email.transactional/adapters/ses")),
+    ).rejects.toThrow(); // only the flattened selected adapter is vendored
+
+    const env = await readFile(path.join(repo2, ".env.example"), "utf8");
+    expect(env).toContain("EMAIL_ADAPTER=ses");
+    expect(env).toContain("AWS_ACCESS_KEY_ID=");
+
+    const ver = await verifyRepo(repo2);
+    expect(ver.ok).toBe(true);
   });
 });
 
@@ -91,10 +119,10 @@ describe("real registry: webhooks.ingest installs end-to-end", () => {
 
   it("coexists with email.transactional — first two-part repo, no capability overlap", async () => {
     const res = await addPart(repo, { name: "email.transactional", adapter: "resend" });
-    expect(res.version).toBe("1.0.1");
+    expect(res.version).toBe("1.1.0");
 
     const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
-    expect(agents).toContain("email.transactional@1.0.1");
+    expect(agents).toContain("email.transactional@1.1.0");
     expect(agents).toContain("webhooks.ingest@1.0.1");
 
     const ver = await verifyRepo(repo);

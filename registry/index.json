@@ -2,10 +2,11 @@
   "registry_version": 1,
   "parts": {
     "email.transactional": {
-      "latest": "1.0.1",
+      "latest": "1.1.0",
       "versions": [
         "1.0.0",
-        "1.0.1"
+        "1.0.1",
+        "1.1.0"
       ],
       "provides": [
         "email.transactional@1"

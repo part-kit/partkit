@@ -1,0 +1,15 @@
+{
+  "part": "email.transactional",
+  "version": "1.1.0",
+  "adapter": "ses",
+  "content_hash": "sha256:84da0805fd7d60affa4acacc65831d34d406d052b6f720654704fbbe6c724177",
+  "verified_at": "2026-06-14T06:55:57.497Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 11,
+  "result_hash": "sha256:c20e2fb5a9233f04055fb5df096f5c2b9190db56b562ce5ed68b8823a6c024eb",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T06:55:57.497Z"
+}

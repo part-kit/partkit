@@ -1,6 +1,6 @@
 {
   "name": "@part-kit/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "PartKit protocol reference implementation: contract/lockfile/attestation schemas, part hashing, registry client, and the init/add/verify/guard operations",
   "type": "module",
   "license": "MIT",

@@ -6,7 +6,7 @@ import {
   DEFAULT_REGISTRY,
   GUARD_MESSAGE,
   MIGRATIONS_TABLE,
-  addPart,
+  addParts,
   auditRepo,
   ejectPart,
   guardRepo,
@@ -98,38 +98,77 @@ program
 
 program
   .command("add")
-  .description("Vendor a part from the registry and pin it in parts.lock")
-  .argument("<part>", "part name, e.g. billing.subscription")
-  .option("--adapter <name>", "vendor adapter to install")
-  .option("--part-version <semver>", "part version (default: latest)")
+  .description("Vendor parts, packs, or part:adapter specs — resolves order, pulls requires, skips installed")
+  .argument(
+    "<targets...>",
+    "parts, packs, or part[@version][:adapter] — e.g. saas, email.transactional:postmark",
+  )
+  .option("--adapter <name>", "adapter for a single part (or use part:adapter)")
+  .option("--part-version <semver>", "version for a single part (or use part@version)")
   .option("--registry <source>", "override the registry recorded in parts.lock")
   .option("--allow-community", "accept community-tier adapters (conformance not run in our CI)")
   .action(
     async (
-      part: string,
+      targets: string[],
       o: { adapter?: string; partVersion?: string; registry?: string; allowCommunity?: boolean },
     ) => {
       try {
-        const res = await addPart(process.cwd(), {
-          name: part,
-          ...(o.adapter !== undefined && { adapter: o.adapter }),
-          ...(o.partVersion !== undefined && { version: o.partVersion }),
+        // Back-compat: --adapter / --part-version apply to a single target.
+        let raw = targets;
+        if (o.adapter !== undefined || o.partVersion !== undefined) {
+          if (targets.length !== 1) {
+            throw new Error(
+              "--adapter / --part-version apply to one part; for several, use part@version:adapter syntax.",
+            );
+          }
+          let t = targets[0]!;
+          if (o.partVersion !== undefined) t = `${t}@${o.partVersion}`;
+          if (o.adapter !== undefined) t = `${t}:${o.adapter}`;
+          raw = [t];
+        }
+
+        const res = await addParts(process.cwd(), {
+          targets: raw,
           ...(o.registry !== undefined && { registrySource: o.registry }),
           ...(o.allowCommunity !== undefined && { allowCommunity: o.allowCommunity }),
         });
-        const adapterNote = res.adapter !== null ? ` (adapter: ${res.adapter})` : "";
-        console.log(`✔ ${res.name}@${res.version}${adapterNote} vendored into parts/`);
-        if (res.envKeys.length > 0) {
-          console.log(`  env: fill in ${res.envKeys.join(", ")} (.env.example scaffolded)`);
+
+        for (const pk of res.packs) {
+          console.log(`▪ pack ${pk.pack} — ${pk.capabilities.length} capabilities`);
         }
-        const addedDeps = Object.entries(res.npmDependencies.added);
-        if (addedDeps.length > 0) {
-          console.log(
-            `  npm: added ${addedDeps.map(([n, r]) => `${n}@${r}`).join(", ")} to package.json — run your package manager's install`,
-          );
+        for (const s of res.alreadySatisfied) {
+          console.log(`= ${s.capability} already provided by ${s.part}@${s.version}`);
         }
-        console.log(`  now write the seams: ${res.seamsPath}`);
-        for (const w of res.warnings) console.log(`  ! ${w}`);
+        for (const r of res.installed) {
+          const adapterNote = r.adapter !== null ? ` (adapter: ${r.adapter})` : "";
+          console.log(`✔ ${r.name}@${r.version}${adapterNote} vendored into parts/`);
+          const addedDeps = Object.entries(r.npmDependencies.added);
+          if (addedDeps.length > 0) {
+            console.log(`  npm: + ${addedDeps.map(([n, v]) => `${n}@${v}`).join(", ")}`);
+          }
+          for (const w of r.warnings) console.log(`  ! ${w}`);
+        }
+
+        if (res.installed.length > 0) {
+          if (res.envRequired.length > 0) {
+            console.log(`\nenv: fill in ${res.envRequired.join(", ")} (.env.example scaffolded)`);
+          }
+          console.log(`migrations: ${res.migrations}`);
+          console.log("\nNow write the seams (the only code you touch):");
+          for (const s of res.seams) console.log(`  - ${s}`);
+        }
+        for (const n of res.notes) console.log(`note: ${n}`);
+
+        if (res.failed !== null) {
+          console.error(`\n✖ ${res.failed.part}: ${res.failed.error}`);
+          if (res.notLanded.length > 0) {
+            console.error(`  not attempted: ${res.notLanded.join(", ")} — fix the above and re-run to resume.`);
+          }
+          process.exit(1);
+        }
+        if (res.installed.length === 0 && res.packs.length === 0) {
+          console.log("Nothing to install — everything requested is already in parts.lock.");
+        }
       } catch (e) {
         fail(e);
       }

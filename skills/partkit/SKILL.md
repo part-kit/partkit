@@ -31,7 +31,9 @@ part documents in its `seams.md`.
 4. **Write the seams.** Read `parts/<name>/contract.json` and
    `parts/<name>/seams.md` — they are sufficient; do not read `src/`.
    `examples/` contains unattested starting points you may copy and own.
-5. **Verify.** `npx partkit verify` and `npx partkit guard` must be green.
+5. **Audit.** `npx partkit audit` must be green (one command — it runs the
+   boundary, import, attestation, route, env, and sprawl checks; `verify` and
+   `guard` remain available individually, and `guard --staged` is the pre-commit hook).
    Integrity failures are real problems; `[UNSIGNED]`/staleness warnings are
    freshness, not danger — never "fix" them by editing anything.
 

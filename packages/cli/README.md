@@ -4,18 +4,24 @@ Verified, attested standard parts for AI coding agents — **the agent writes on
 
 PartKit packages each product capability (transactional email, webhook ingestion, auth, billing, …) as a **part**: vendored code with a machine-readable contract, a conformance test suite every adapter must pass, and a continuously re-issued signed attestation. Parts are copied into your repo shadcn-style — you own every line, you can read every line, and a boundary guard makes sure nobody (human or agent) edits part interiors and silently voids the attestation.
 
-## Status: pre-v0 — name-claim release
+## Status: pre-v0
 
-This is an early release published to claim the package name. The CLI works, but the hosted registry (`registry.partkit.dev`) is **not live yet** — `partkit add` currently requires `--registry <path>` pointing at a local checkout of the registry. Watch [partkit.dev](https://partkit.dev) for the public launch.
+The hosted registry (`registry.partkit.dev`) is **live** and serves the catalogue, so `partkit add` works out of the box. Attestations are dev-tier (unsigned; real signing is on the roadmap). Watch [partkit.dev](https://partkit.dev) for the public launch.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `partkit init` | Install the boundary guard (pre-commit + CI), `parts.lock`, and `AGENTS.md` rules |
-| `partkit add <part>` | Vendor a part from the registry and pin it in `parts.lock` |
+| `partkit add <targets...>` | Vendor parts, a pack, or `part[@version][:adapter]` specs — resolves order, pulls `requires`, skips installed. e.g. `partkit add saas` or `partkit add email.transactional:postmark storage.upload` |
+| `partkit plan <capabilities...>` | Resolve capabilities into a deterministic install plan (no changes made) |
+| `partkit audit` | Did the repo respect its contracts? Boundary + attestations + routes/env/sprawl in one pass |
+| `partkit upgrade <part>` | Upgrade a part's version and/or flip its adapter — you get only the seam changes |
 | `partkit verify` | Verify attestation integrity (hard fail) and freshness (warn; `--strict` to fail) |
 | `partkit guard` | Fail if `parts/**` no longer matches `parts.lock` |
+| `partkit migrate` | Apply pending part-owned database migrations |
+
+A **pack** is a curated capability kit for a product shape — `partkit add saas` installs the whole Team-SaaS skeleton (auth, billing, email, webhooks, jobs, storage, rate limiting, audit, admin) in one command, resolving order and picking sensible default adapters.
 
 ## The idea in one paragraph
 

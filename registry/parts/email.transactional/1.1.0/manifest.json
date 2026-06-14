@@ -1,0 +1,107 @@
+{
+  "manifest_version": 1,
+  "part": "email.transactional",
+  "version": "1.1.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "c8fdca66f8972bf30122f59c614f7e4f2a8798297a791cec4c11dfbff2990217",
+      "bytes": 4354
+    },
+    {
+      "path": "adapters/postmark/adapter.ts",
+      "sha256": "6c7dd3ecd2065811612bb072be8e5efa48b7c08f2437f2d6b25dde73efc64d0e",
+      "bytes": 2372
+    },
+    {
+      "path": "adapters/resend/adapter.ts",
+      "sha256": "f2f03c022ed0903d3898769e77640f7b83bfdb9852d9c562388634e290b83ee7",
+      "bytes": 2212
+    },
+    {
+      "path": "adapters/ses/adapter.ts",
+      "sha256": "9a2cff8cf56d60722ac2fb5f9b2e2441acf5e4e0a8808bf3fc8ef253ad8b14c2",
+      "bytes": 3292
+    },
+    {
+      "path": "conformance/fake-vendor.ts",
+      "sha256": "a8b76580f700dedee0ec90791e2323f7581ccdddaca4b25ef817749e77258422",
+      "bytes": 2358
+    },
+    {
+      "path": "conformance/send.test.ts",
+      "sha256": "8edfdf9454f3f80d47d3f01adc774b2e3bc582d0a000f11b70bf4f4bb5828e73",
+      "bytes": 7901
+    },
+    {
+      "path": "contract.json",
+      "sha256": "4df448ca9d0b7218adaf646bb5d5571be64a155eb15c4bea70aa1f839940db03",
+      "bytes": 2114
+    },
+    {
+      "path": "examples/welcome-email.ts",
+      "sha256": "c74173b8a9ef019d4053075bcecc531b86144b79716f48670baaa42d4f60836e",
+      "bytes": 940
+    },
+    {
+      "path": "migrations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "migrations/1.0.1-1.1.0/seam-changes.md",
+      "sha256": "d109adb4ff88d3980b8ec1b8cbbe9b3f91d27ac5e3aa3f4a768ec7a55d4b8211",
+      "bytes": 857
+    },
+    {
+      "path": "seams.md",
+      "sha256": "e874ff54ec1c9649d34fee8160c813a27686fe36e8d76d70f890f3c6a03115ca",
+      "bytes": 3798
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "07099959952beb929bd593a69c584f93484c61c367fd54ac38345cdc620f56f5",
+      "bytes": 2292
+    },
+    {
+      "path": "src/internal/config.ts",
+      "sha256": "3c0bcedeb09f61b7f2f8fc92a2e6fff5be00dad5ec36f3dda60812ab74a9b4b5",
+      "bytes": 1487
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "db056cbc152174805b305770f5ea37d9fd635fcea9bc175b85c5122402ab427b",
+      "bytes": 2052
+    },
+    {
+      "path": "src/internal/redact.ts",
+      "sha256": "ad41e8f3cdee7cbe3d7b3c8d6b8ddbecc957dc9ef9fe9c1a519f53a3de9172bc",
+      "bytes": 552
+    },
+    {
+      "path": "src/internal/retry.ts",
+      "sha256": "b08b9c700b604b08fe0c2fff68faedf7e414abf974cd4d6d588c2caa83bad141",
+      "bytes": 945
+    },
+    {
+      "path": "src/internal/sigv4.ts",
+      "sha256": "4cb50160266cb15333a55febbd924073d7bec65465e78bad212cb01b2abfc6b9",
+      "bytes": 3050
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "7c4a8ea11bb94312bbc44c8db8dca4921a2b0d8f8c91145bdb7289289a4ec481",
+      "bytes": 1195
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "5cc72e1cfeced6b6d2f81586e1d35b39c01556242ea33af9fec81d85f6f5fff2",
+      "bytes": 2084
+    }
+  ],
+  "attestations": [
+    "postmark",
+    "resend",
+    "ses"
+  ]
+}

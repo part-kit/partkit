@@ -29,11 +29,14 @@ export {
   DEFAULT_REGISTRY,
   HttpRegistry,
   ManifestSchema,
+  PackSchema,
   RegistryIndexSchema,
   StaticRegistry,
+  assertPackName,
   openRegistry,
   type FetchedContent,
   type Manifest,
+  type Pack,
   type PartRegistry,
   type RegistryIndex,
 } from "./registry.js";
@@ -49,6 +52,13 @@ export {
 } from "./templates.js";
 export { initRepo, type InitOptions, type InitResult } from "./ops/init.js";
 export { addPart, type AddOptions, type AddResult } from "./ops/add.js";
+export {
+  addParts,
+  parseAddTarget,
+  type AddPartsOptions,
+  type AddPartsResult,
+  type ParsedTarget,
+} from "./ops/add-parts.js";
 export {
   verifyRepo,
   type Finding,

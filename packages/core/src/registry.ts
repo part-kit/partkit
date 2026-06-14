@@ -21,6 +21,22 @@ export const RegistryIndexSchema = z.object({
 });
 export type RegistryIndex = z.infer<typeof RegistryIndexSchema>;
 
+/**
+ * packs/<name>.json — a curated kit: a capability set for a typical product
+ * shape (a SaaS, a marketplace) that `partkit add <pack>` installs in one shot.
+ * `adapters` pins a default vendor for any capability with more than one attested
+ * adapter, so the kit install is never blocked on a choice.
+ */
+export const PackSchema = z.object({
+  pack: z.string(),
+  title: z.string(),
+  summary: z.string(),
+  capabilities: z.array(z.string()).min(1),
+  seams_the_agent_writes: z.array(z.string()).default([]),
+  adapters: z.record(z.string()).default({}),
+});
+export type Pack = z.infer<typeof PackSchema>;
+
 /** parts/<name>/<version>/manifest.json — the file list a static HTTP registry needs. */
 export const ManifestSchema = z.object({
   manifest_version: z.literal(1),
@@ -53,6 +69,8 @@ export interface FetchedContent {
 export interface PartRegistry {
   readonly source: string;
   index(): Promise<RegistryIndex>;
+  /** A curated kit (packs/<name>.json), or null when the registry has no such pack. */
+  pack(name: string): Promise<Pack | null>;
   contract(name: string, version: string): Promise<Contract>;
   attestation(name: string, version: string, adapter: string | null): Promise<Attestation>;
   seams(name: string, version: string): Promise<string>;
@@ -65,6 +83,13 @@ export interface PartRegistry {
 /** Route by scheme: https → hosted, anything else → local directory. */
 export async function openRegistry(source: string): Promise<PartRegistry> {
   return /^https?:/i.test(source) ? HttpRegistry.open(source) : StaticRegistry.open(source);
+}
+
+/** Pack names address a file path / URL segment — keep them to a safe charset. */
+export function assertPackName(name: string): void {
+  if (!/^[a-z0-9][a-z0-9.-]*$/.test(name)) {
+    throw new Error(`Invalid pack name "${name}" (expected lowercase letters, digits, '.', '-').`);
+  }
 }
 
 /** The v0 local registry — a checkout of the registry directory. */
@@ -86,6 +111,19 @@ export class StaticRegistry implements PartRegistry {
   async index(): Promise<RegistryIndex> {
     const raw = await readFile(path.join(this.source, "index.json"), "utf8");
     return RegistryIndexSchema.parse(JSON.parse(raw));
+  }
+
+  async pack(name: string): Promise<Pack | null> {
+    assertPackName(name);
+    let raw: string;
+    try {
+      raw = await readFile(path.join(this.source, "packs", `${name}.json`), "utf8");
+    } catch (e) {
+      // Only "no such pack" → null; a real read error must not masquerade as one.
+      if ((e as NodeJS.ErrnoException).code === "ENOENT") return null;
+      throw e;
+    }
+    return PackSchema.parse(JSON.parse(raw));
   }
 
   /** Registry-side part content (all adapters; pruned at vendor time). */
@@ -215,6 +253,26 @@ export class HttpRegistry implements PartRegistry {
     // The index changes as parts publish — fetched fresh, not cached.
     const raw = await this.fetchBytes(this.url("index.json"));
     return RegistryIndexSchema.parse(JSON.parse(raw.toString("utf8")));
+  }
+
+  async pack(name: string): Promise<Pack | null> {
+    assertPackName(name);
+    return this.cached(`pack:${name}`, async () => {
+      // Distinguish a 404 (true "no such pack" → null, the caller treats it as a
+      // part) from a network/5xx error (rethrow — never misread a real pack as a
+      // part because the network blipped).
+      const url = this.url("packs", `${name}.json`);
+      let res: Response;
+      try {
+        res = await fetch(url);
+      } catch (e) {
+        throw new Error(`Registry unreachable: ${url} (${e instanceof Error ? e.message : String(e)})`);
+      }
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`Registry request failed: ${res.status} ${res.statusText} for ${url}`);
+      const raw = Buffer.from(await res.arrayBuffer());
+      return PackSchema.parse(JSON.parse(raw.toString("utf8")));
+    });
   }
 
   async contract(name: string, version: string): Promise<Contract> {

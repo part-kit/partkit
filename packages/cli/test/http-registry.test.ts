@@ -84,7 +84,7 @@ describe("the hosted registry over HTTP", () => {
     const repo = await makeApp(srv.url);
 
     const res = await addPart(repo, { name: "email.transactional", adapter: "resend" });
-    expect(res.version).toBe("1.0.1");
+    expect(res.version).toBe("1.1.0");
     await stat(path.join(repo, "parts/email.transactional/adapters/selected/adapter.ts"));
     const lf = await readLockfile(repo);
     expect(lf?.registry.source).toBe(srv.url);

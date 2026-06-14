@@ -12,6 +12,9 @@
     "email.transactional"
   ],
   "distinctive": ["search.fulltext", "flags.feature"],
+  "adapters": {
+    "email.transactional": "resend"
+  },
   "seams_the_agent_writes": [
     "listing / content pages",
     "search UI + ranking choices",

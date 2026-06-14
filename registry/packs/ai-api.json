@@ -14,6 +14,9 @@
     "email.transactional"
   ],
   "distinctive": ["auth.apikey", "billing.usage", "webhooks.dispatch"],
+  "adapters": {
+    "email.transactional": "resend"
+  },
   "seams_the_agent_writes": [
     "the API surface / model-call handlers",
     "developer dashboard (key management UI from auth.apikey examples/)",

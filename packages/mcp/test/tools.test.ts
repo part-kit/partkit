@@ -157,8 +157,8 @@ describe("MCP tools against the real registry", () => {
       "ratelimit.api",
       "webhooks.ingest",
     ]);
-    // email + webhooks each have two attested adapters → explicit choice
-    expect(plan.install_order[0]!.adapter_choices).toEqual(["postmark", "resend"]);
+    // email now has three attested adapters (resend/postmark/ses) → explicit choice
+    expect(plan.install_order[0]!.adapter_choices).toEqual(["postmark", "resend", "ses"]);
     expect(plan.install_order[2]!.adapter_choices).toEqual(["standardwebhooks", "stripe"]);
     // ratelimit is the zero-adapter, zero-env precedent
     expect(plan.install_order[1]!.adapter).toBeNull();
