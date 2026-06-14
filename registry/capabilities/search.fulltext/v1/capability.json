@@ -1,0 +1,24 @@
+{
+  "capability": "search.fulltext",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Postgres-native full-text search — index documents, then search them with raw user query strings safely, ranked (title over body) with highlighted snippets, on plain Postgres with no separate search vendor.",
+  "interface": {
+    "exports": [
+      "search(db: SqlExecutor): SearchIndex",
+      "SearchIndex { index(doc: IndexDocInput): Promise<void>; remove(ref: string): Promise<void>; query(input: SearchQuery): Promise<SearchResult[]> }",
+      "class SearchError extends Error { code: SearchErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; index/query validate input with a typed SearchError, and a storage failure surfaces as SearchError(\"storage\") (raw driver errors never escape)",
+    "index upserts by ref — re-indexing the same ref replaces the document (never a duplicate); remove is idempotent (removing an absent ref is a no-op)",
+    "query accepts a RAW user query string and never throws on syntax — operators, quotes, an unbalanced & or :, accents — are handled as a search expression (websearch_to_tsquery), not as tsquery syntax that can error",
+    "Results are ranked by relevance (ts_rank), title outranks body (weighted A vs B), filtered by type, paginated by limit/offset, and each carries a highlighted snippet of the match",
+    "A query that matches nothing returns an empty array (not an error); multiple matches come back best-first deterministically (stable secondary sort)",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement targets only its own search_documents table; every input, including the raw query string, is parameterized (no injection)"
+  ],
+  "notes": "Specified by RFC 0007 (the capability was already in the docs/02 namespace). Mirrors audit.log: zero-dependency, zero-adapter, driver-free via the SqlExecutor seam, owns the search_documents table, reads no env. Pure Postgres FTS: search_vector is a STORED generated column (setweight(to_tsvector('english', title),'A') || setweight(to_tsvector('english', body),'B')) so it can never drift, with a GIN index; queries use websearch_to_tsquery (never throws on raw user input) + ts_rank (title weight A > body weight B) + ts_headline snippets (computed only on the returned page); ORDER BY rank DESC, ref for deterministic pagination; INSERT ON CONFLICT (ref) DO UPDATE upsert. The raw query is a bound parameter parsed server-side (no injection). snippet is NOT HTML-escaped — the consuming app must escape it (ts_headline is not XSS-safe). With marketplace's flags.feature this completes the marketplace pack, and Wave 2 / all four skeletons. The suite lives with the implementing part until a second provider (a dedicated engine) exists, then moves here (docs/02 §3-4)."
+}

@@ -632,3 +632,70 @@ describe("real registry: billing.usage installs end-to-end (metered-usage ledger
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: flags.feature installs end-to-end (feature flags; zero-dep, DB-backed)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, no env, vendors the migration + internal eval, verifies green", async () => {
+    const res = await addPart(repo, { name: "flags.feature" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull();
+    expect(res.envKeys).toEqual([]); // zero-dep + driver-free: no env
+
+    await stat(path.join(repo, "parts/flags.feature/src/index.ts"));
+    await stat(path.join(repo, "parts/flags.feature/seams.md"));
+    await stat(path.join(repo, "parts/flags.feature/examples/use-flags.ts"));
+    await stat(path.join(repo, "parts/flags.feature/src/internal/eval.ts"));
+    await stat(path.join(repo, "parts/flags.feature/migrations/001-create-feature-flags.sql"));
+    await stat(path.join(repo, "parts/flags.feature/ATTESTATION.json"));
+    await expect(stat(path.join(repo, "parts/flags.feature/adapters"))).rejects.toThrow();
+    await expect(stat(path.join(repo, ".env.example"))).rejects.toThrow();
+
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("flags.feature@1.0.0");
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});
+
+describe("real registry: search.fulltext installs end-to-end (Postgres FTS; zero-dep, DB-backed)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, no env, vendors the FTS migration, verifies green", async () => {
+    const res = await addPart(repo, { name: "search.fulltext" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull();
+    expect(res.envKeys).toEqual([]); // zero-dep + driver-free: no env
+
+    await stat(path.join(repo, "parts/search.fulltext/src/index.ts"));
+    await stat(path.join(repo, "parts/search.fulltext/seams.md"));
+    await stat(path.join(repo, "parts/search.fulltext/examples/index-and-search.ts"));
+    await stat(path.join(repo, "parts/search.fulltext/migrations/001-create-search-documents.sql"));
+    await stat(path.join(repo, "parts/search.fulltext/ATTESTATION.json"));
+    await expect(stat(path.join(repo, "parts/search.fulltext/adapters"))).rejects.toThrow();
+    await expect(stat(path.join(repo, ".env.example"))).rejects.toThrow();
+
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("search.fulltext@1.0.0");
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

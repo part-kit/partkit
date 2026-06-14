@@ -1,0 +1,24 @@
+{
+  "capability": "flags.feature",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Typed feature flags with first-match targeting rules and sticky percentage rollout, evaluated on a fail-safe hot path (an unknown flag / type mismatch / storage error returns the caller's fallback, never throws).",
+  "interface": {
+    "exports": [
+      "flags(db: SqlExecutor): FlagSet",
+      "FlagSet { evaluate<T extends FlagValue>(key, context, fallback): Promise<T>; evaluateAll(context): Promise<Record<string, FlagValue>>; setFlag(def): Promise<void>; getFlag(key): Promise<FlagDefinition | null>; listFlags(): Promise<FlagDefinition[]>; archiveFlag(key): Promise<void> }",
+      "class FlagError extends Error { code: FlagErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; management operations validate input with a typed FlagError, and evaluate/evaluateAll are FAIL-SAFE — an unknown flag, a stored value whose type differs from the flag's declared type, or a storage error returns the caller's fallback (or omits the flag) and never throws",
+    "Evaluation is deterministic and sticky: the same (key, subjectId) resolves to the same variant for a given flag config; percentage rollout buckets uniformly by a stable hash of the flag key and subject id, so a subject does not flicker between requests and a 10% rollout is ~10% of subjects",
+    "Targeting rules are first-match-wins, with each rule's conditions AND-ed against the context attributes; a non-matching or attribute-less context falls through to rollout, then to the flag's default",
+    "A disabled flag resolves to its configured default; an archived or unknown flag resolves to the caller's fallback",
+    "Flag values are type-checked against the flag's declared type — a value of the wrong type never escapes as the wrong type (it fails safe to the fallback); setFlag rejects a default, variant, or rule value that does not match the declared type",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement targets only its own feature_flags table; every input is parameterized, so SQL metacharacters are stored literally and never executed"
+  ],
+  "notes": "Specified by RFC 0006 (the capability was already in the docs/02 namespace). Mirrors audit.log: zero-dependency (node:crypto only, for sticky bucketing), zero-adapter, driver-free via the SqlExecutor seam, owns the feature_flags definition table, reads no env. Evaluation is stateless (one indexed lookup per evaluate; one active-flags scan per evaluateAll) and FAIL-SAFE — it never throws, returning the caller fallback on any error; management ops are strict and throw a typed FlagError. Sticky percentage rollout buckets by (sha256(key+':'+subjectId).readUInt32BE(0) % 100000)/100000 — first 4 bytes only (a JS number has 53 mantissa bits; >53 bits breaks uniformity), salted by the flag key so flags don't correlate. Disabled→flag.default vs archived/unknown→caller.fallback. Two-sided type-checking (setFlag rejects mismatches; evaluate re-checks and fails safe). With marketplace's search.fulltext this completes the marketplace pack. The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

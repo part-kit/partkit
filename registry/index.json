@@ -125,6 +125,24 @@
       "provides": [
         "billing.usage@1"
       ]
+    },
+    "flags.feature": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "flags.feature@1"
+      ]
+    },
+    "search.fulltext": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "search.fulltext@1"
+      ]
     }
   }
 }

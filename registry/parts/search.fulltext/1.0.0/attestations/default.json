@@ -1,0 +1,15 @@
+{
+  "part": "search.fulltext",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:7013200e23e7e2fc885ba01dcf631c1028e48bd869c4bfb8978c3d4024445ff0",
+  "verified_at": "2026-06-14T11:58:49.029Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 15,
+  "result_hash": "sha256:75b33b4741f02e7c92503748072e229f0290510e741d5a54a85222371839aa58",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T11:58:49.030Z"
+}

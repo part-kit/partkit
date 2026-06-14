@@ -1,0 +1,42 @@
+{
+  "part": "flags.feature",
+  "version": "1.0.0",
+  "contract_version": "0.1",
+  "provides": [
+    "flags.feature@1"
+  ],
+  "requires": [],
+  "platform": {
+    "node": ">=22",
+    "postgres": ">=14"
+  },
+  "adapters": [],
+  "interface": {
+    "exports": [
+      "flags(db: SqlExecutor): FlagSet",
+      "FlagSet { evaluate<T extends FlagValue>(key: string, context: EvalContext, fallback: T): Promise<T>; evaluateAll(context: EvalContext): Promise<Record<string, FlagValue>>; setFlag(def: FlagDefinitionInput): Promise<void>; getFlag(key: string): Promise<FlagDefinition | null>; listFlags(): Promise<FlagDefinition[]>; archiveFlag(key: string): Promise<void> }",
+      "class FlagError extends Error { code: FlagErrorCode }",
+      "types: SqlExecutor, FlagValue, FlagType, Json, EvalContext, Condition, Rule, Variant, FlagDefinition, FlagDefinitionInput, FlagSet, FlagErrorCode"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "env": {},
+  "data_ownership": {
+    "tables": [
+      "feature_flags"
+    ],
+    "writes_only_own_tables": true
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; management operations validate input with a typed FlagError, and evaluate/evaluateAll are FAIL-SAFE — an unknown flag, a stored value whose type differs from the flag's declared type, or a storage error returns the caller's fallback (or omits the flag) and never throws",
+    "Evaluation is deterministic and sticky: the same (key, subjectId) resolves to the same variant for a given flag config; percentage rollout buckets uniformly by a stable hash of the flag key and subject id, so a subject does not flicker between requests and a 10% rollout is ~10% of subjects",
+    "Targeting rules are first-match-wins, with each rule's conditions AND-ed against the context attributes; a non-matching or attribute-less context falls through to rollout, then to the flag's default",
+    "A disabled flag resolves to its configured default; an archived or unknown flag resolves to the caller's fallback",
+    "Flag values are type-checked against the flag's declared type — a value of the wrong type never escapes as the wrong type (it fails safe to the fallback); setFlag rejects a default, variant, or rule value that does not match the declared type",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement targets only its own feature_flags table; every input is parameterized, so SQL metacharacters are stored literally and never executed"
+  ],
+  "threat_model": "SPEC.md#threat-model",
+  "license": "MIT",
+  "attestation": "ATTESTATION.json"
+}

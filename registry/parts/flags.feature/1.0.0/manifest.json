@@ -1,0 +1,85 @@
+{
+  "manifest_version": 1,
+  "part": "flags.feature",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "b8c5ceb7b864e7e4d9e7d4b048d5c0abec1ec458a4ce7e023bb52b581372d135",
+      "bytes": 4723
+    },
+    {
+      "path": "conformance/flags.test.ts",
+      "sha256": "8d9d2c70b091d5b93217447e99987e35af827672e2cf5d4a14b050bb1ce722e1",
+      "bytes": 15043
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "dd269bc967d06d9486dc1decb8dba84a3b83aedaab3db39e380053249ca5addf",
+      "bytes": 1331
+    },
+    {
+      "path": "contract.json",
+      "sha256": "ff556ff53fc7f79547a2f009eae235a54df6eecb0803d2f598d3789859067661",
+      "bytes": 2647
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "1ca6e3f264ab1b4f1dfbd3213f60eb8090d3d518d129cf611db013e9dbea9eb7",
+      "bytes": 775
+    },
+    {
+      "path": "examples/use-flags.ts",
+      "sha256": "11c06b1ac4269553fd41743f7ff8f1606de7d562286a877ac86ecc22d7698359",
+      "bytes": 1559
+    },
+    {
+      "path": "migrations/001-create-feature-flags.sql",
+      "sha256": "8ea932e252969c3b5191754ff1431f74ef878ffed0d6a11783ec7d0304c68c10",
+      "bytes": 1230
+    },
+    {
+      "path": "seams.md",
+      "sha256": "4a5afad3f4204ec9c85755b16ec8f7f09ab258a1ae51465064ecd23ac3f17ac1",
+      "bytes": 4648
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "97327d36881a701dba46f72c7bd4e6737a2bd22594991457a1daad2ac066b72c",
+      "bytes": 1378
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "2ee1df60a163f300a06b04002e2936c6f2d9e451a151250081882951a8518592",
+      "bytes": 644
+    },
+    {
+      "path": "src/internal/eval.ts",
+      "sha256": "c3a6e1095e4072c2be442b04f23c12f18b2100c93c40c759065c35e52ce2d33d",
+      "bytes": 5332
+    },
+    {
+      "path": "src/internal/flags.ts",
+      "sha256": "215fb97c393a0f7dd783333e82b6adf0afe73f8c3257c1c356cb3b104256faf4",
+      "bytes": 3987
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "6a18088166314b011fb9bb665bb2e723962eecaaacc4a82fc585870cd019bc5e",
+      "bytes": 2822
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "57ccf5bf4224ef448582631389b153f3d64e601966ccccf82cf6784f553e4d7d",
+      "bytes": 2990
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "87c02209122c4648c35033237af36ae23494737ed2902ea45eef81ebdd3aa6cb",
+      "bytes": 5101
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

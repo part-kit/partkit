@@ -144,6 +144,36 @@ aggregate); a 5-lens adversarial review ran before publish.
 `billing.usage` + `webhooks.dispatch` are all shipped** (plus the shared core).
 The pack manifest can drop its "not installable yet" gate once re-mirrored.
 
+**Wave 2 COMPLETE — `flags.feature` + `search.fulltext` shipped 1.0.0
+(2026-06-14), finishing the `marketplace` pack and all four skeletons.** Both
+specified by new RFCs (0006, 0007), both mirror `audit.log` (zero-dependency,
+zero-adapter, driver-free via the SqlExecutor seam, one owned table, no env).
+- **`flags.feature`** — typed feature flags with first-match targeting rules and
+  sticky percentage rollout, on a **fail-safe** hot path: `evaluate` never throws,
+  returning the caller's fallback on an unknown flag / type mismatch / storage
+  error. Sticky bucketing is `sha256(len(key):key+subjectId) → uint32 → /100000`
+  (first 4 bytes; length-prefixed so composite ids can't collide), key-salted so
+  flags don't correlate. Disabled→flag.default vs archived/unknown→caller.fallback;
+  two-sided type-checking. 15 conformance tests (incl. the bucketing-uniformity
+  math). A 5-lens review fixed a real HIGH (an inherited-property rule key like
+  `__proto__` bypassing the missing-attribute guard → `Object.hasOwn`) + 5 lower.
+- **`search.fulltext`** — Postgres-native full-text search: a STORED generated
+  `tsvector` column (title weight A > body B) + GIN index that can't drift;
+  `websearch_to_tsquery` so raw user queries never throw; `ts_rank` ranking with a
+  `rank DESC, ref` tiebreak for deterministic pagination; `ts_headline` snippets
+  scoped to the page **over a `left(…, 8192)` slice** so per-row highlight cost is
+  O(const), not O(body). No separate search vendor. 15 conformance tests vs real
+  Postgres (ranking/raw-safety/pagination/injection); SQL verified live on PG 17.9.
+  A 5-lens review fixed a real HIGH — `ts_headline` ran on the full ≤1 MB body and
+  high term-frequency floats large bodies to the top, so one request could burn ~7 s
+  of CPU (worse for a phrase query); the 8 KB input cap is ~100× cheaper, identical
+  snippet — plus a NUL-byte input (SQLSTATE 22021/22P05 → would 500) now rejected as
+  `invalid_input`, and `offset` capped at 10 000 (a deep offset disk-spills a full
+  rank-sort).
+
+**All four App Pack skeletons are now assemblable from verified parts** (`saas`,
+`ai-api`, `marketplace`, `backoffice`). Registry: 15 parts. Wave 2 is done.
+
 **A skeleton is "done well"** — the standard a team actually adopts — only when
 an assembled app demonstrates four things in the running product, not just in
 tests: it is **robust** (the security exhibits are live — `429`, replay/tamper

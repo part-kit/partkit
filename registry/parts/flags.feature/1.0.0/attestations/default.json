@@ -1,0 +1,15 @@
+{
+  "part": "flags.feature",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:4a81f509b9c509b81fa5b928e28197f387a5c49d2d580be1242192d74d757deb",
+  "verified_at": "2026-06-14T11:39:52.250Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 15,
+  "result_hash": "sha256:fddf11b49c997b52891cce3df490cb895cce444c15625de5ebad456aa88d75f2",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T11:39:52.251Z"
+}
