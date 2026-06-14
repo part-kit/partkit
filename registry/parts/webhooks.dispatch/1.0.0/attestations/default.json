@@ -1,0 +1,15 @@
+{
+  "part": "webhooks.dispatch",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:23f78c297666694b505a10f78af8f9c15138cd4cfa23e0121049989db50ef44c",
+  "verified_at": "2026-06-14T09:27:41.971Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 17,
+  "result_hash": "sha256:48e183c093aa79abb1397b6dddfabc56eaa7e6ef801d14620d5a6caa26000b95",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T09:27:41.972Z"
+}

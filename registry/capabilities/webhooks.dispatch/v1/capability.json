@@ -1,0 +1,26 @@
+{
+  "capability": "webhooks.dispatch",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Outbound signed webhooks — register customer endpoints, dispatch events to a transactional outbox (never inline), and deliver out-of-band with retry, capped backoff, a delivery log, dead-letter, and SSRF defense. The API-facing sibling of webhooks.ingest.",
+  "interface": {
+    "exports": [
+      "dispatcher(db: SqlExecutor): Dispatcher",
+      "Dispatcher { registerEndpoint(input: RegisterEndpointInput): Promise<RegisteredEndpoint>; dispatch(input: DispatchInput): Promise<DispatchResult>; deliverDue(opts?: DeliverDueOptions): Promise<DeliveryReport>; listAttempts(messageId: string): Promise<DeliveryAttempt[]> }",
+      "class DispatchError extends Error { code: DispatchErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; registerEndpoint/dispatch validate input with typed errors and zero network calls, and every storage failure surfaces as a typed DispatchError (raw driver errors never escape)",
+    "dispatch NEVER performs the HTTP delivery inline — it persists to the outbox and returns a messageId; a slow or hostile customer endpoint cannot block or fail the caller. Delivery happens only in deliverDue",
+    "Every delivery carries a valid Standard Webhooks signature over `${id}.${timestamp}.${body}` — byte-identical to what webhooks.ingest's standardwebhooks adapter verifies; any tampered byte makes verification fail",
+    "Delivery is retried with capped exponential backoff on network error / 5xx / 429 (honoring Retry-After), up to a bounded attempt count; a 4xx (except 429) is permanent and not retried; every attempt is recorded, and an exhausted message moves to dead-letter, never silently dropped",
+    "At-least-once with idempotency: the same idempotencyKey enqueued twice yields exactly one outbox row; each delivery carries a stable webhook-id for receiver-side dedupe",
+    "SSRF defense: registerEndpoint and delivery refuse non-public destinations — http:// (https only), loopback, link-local, RFC-1918 private ranges, unique-local IPv6, and 169.254.169.254 — enforced at delivery time on the DNS-resolved IP, not just at registration, to defeat DNS rebinding",
+    "The endpoint secret is returned exactly once at registration, stored only as needed to sign, and never appears in error messages, in DispatchError, or in listAttempts",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement it issues targets only its own webhooks_dispatch_* tables; every input is parameterized, so SQL metacharacters are stored literally and never executed"
+  ],
+  "notes": "The API-facing sibling of webhooks.ingest, added by RFC 0003 to make the AI-app / API-product skeleton (App Pack ai-api) assemblable. Zero-dependency (node:crypto/dns/https) and driver-free: the connection is the app's SqlExecutor seam, so the part ships zero adapters and zero env and owns webhooks_dispatch_endpoints/outbox/attempts. dispatch is enqueue-only (transactional outbox); deliverDue is a self-contained drainer owning retry/backoff/dead-letter, so it composes with jobs.queue (a clock) or a plain cron with NO requires edge (RFC 0003 §4). Signing reuses Standard Webhooks byte-for-byte (pinned to the spec's known-answer vector). SSRF defense resolves the host, validates every record against a private-range BlockList, then connects to the validated IP (with servername for TLS) so the validated IP is the connected IP — rebinding-proof with no TOCTOU; a fresh socket per delivery + an absolute per-delivery deadline close the keep-alive-pool bypass and the slow-trickle hang (the native blockList option is not honored for https, and global fetch can't be made SSRF-safe zero-dep). Conformance runs against real Postgres + a protocol-faithful fake receiver (gated on PARTKIT_TEST_DATABASE_URL), driving deliverDue({now}) with a fake clock; signing/validation/SSRF-rejection also run DB-free. The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

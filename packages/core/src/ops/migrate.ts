@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { Dirent } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { LOCKFILE_NAME, readLockfile } from "../lockfile.js";
@@ -71,15 +72,19 @@ async function loadMigrationFiles(
   const out = new Map<string, MigrationFile[]>();
   for (const part of parts) {
     const dir = path.join(repoRoot, "parts", part, "migrations");
-    let entries: string[];
+    let dirents: Dirent[];
     try {
-      entries = await readdir(dir);
+      dirents = await readdir(dir, { withFileTypes: true });
     } catch {
-      entries = [];
+      dirents = [];
     }
     const files: MigrationFile[] = [];
-    for (const entry of entries) {
+    for (const dirent of dirents) {
+      const entry = dirent.name;
       if (entry === ".gitkeep" || entry === ".DS_Store") continue;
+      // Subdirectories are upgrade seam-change docs (migrations/<from>-<to>/seam-changes.md),
+      // not migrations to apply — skip them, but still guard against stray files.
+      if (dirent.isDirectory()) continue;
       const m = MIGRATION_FILE_RE.exec(entry);
       if (!m) {
         throw new Error(
@@ -221,6 +226,9 @@ export async function runMigrations(
         await executor.query("BEGIN");
         try {
           await executor.query(mig.sql);
+          // A migration may change search_path (a pg_dump emits set_config('search_path','')),
+          // which would hide the unqualified ledger table — reset before recording.
+          await executor.query("RESET search_path");
           await recordApplied(executor, mig);
           await executor.query("COMMIT");
         } catch (e) {
@@ -239,6 +247,7 @@ export async function runMigrations(
           );
         }
         try {
+          await executor.query("RESET search_path"); // see note above: migrations may move search_path
           await recordApplied(executor, mig);
         } catch (e) {
           throw new Error(

@@ -37,8 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav className="nav">
               <Link href="/parts">Parts</Link>
-              <Link href="/faq">FAQ</Link>
+              <a href="https://infra.partkit.dev">Cost planner</a>
               <a href="https://demo.partkit.dev">Demo</a>
+              <Link href="/faq">FAQ</Link>
               <a href="/skills/partkit/SKILL.md">Skill</a>
               <a href="https://www.npmjs.com/package/partkit">npm</a>
             </nav>
@@ -58,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div>
                 <span className="k">Rev</span>
-                <span className="v">0.2.1 · pre-v0</span>
+                <span className="v">0.3.0 · pre-v0</span>
               </div>
               <div>
                 <span className="k">Material</span>

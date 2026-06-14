@@ -1,0 +1,105 @@
+{
+  "manifest_version": 1,
+  "part": "webhooks.dispatch",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "4cb07cad68658ca5c689f62ef3c278de394784abdb7fe66cebb3c9191d535cf0",
+      "bytes": 8335
+    },
+    {
+      "path": "conformance/dispatch.test.ts",
+      "sha256": "34873d53047bde98e0ac890bcfc89fbad2b87988fca087e95c5386fe06b891f6",
+      "bytes": 20262
+    },
+    {
+      "path": "conformance/fake-receiver.ts",
+      "sha256": "2db4462d630fbe8e8c43b5c0dbb1c1a7d8d9ffc69578de2aefe818bd16df8d10",
+      "bytes": 3856
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "00a8737b09bcbc4f791b47cd902f2422dc8c771be15777097917f65597a2d99c",
+      "bytes": 1428
+    },
+    {
+      "path": "contract.json",
+      "sha256": "abb422e4b4194360e474cee12e82cc5668b05765a9d0c8f9c9855f8f019a0c47",
+      "bytes": 3207
+    },
+    {
+      "path": "examples/jobs-wiring.ts",
+      "sha256": "93f98ee5ddd743a845a06f1480b2932c0a86a404d8611b7373c3e1b77e434bab",
+      "bytes": 1868
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "e8eb1768e42490494784b08b75da33b4826661d2cfbde34b5849b15c6f9aec97",
+      "bytes": 907
+    },
+    {
+      "path": "examples/register-and-dispatch.ts",
+      "sha256": "68b0da61eb2e4dd0d48b12e3438aefc2971db27490f0cb5a3fb091120575628e",
+      "bytes": 1646
+    },
+    {
+      "path": "migrations/001-create-dispatch-tables.sql",
+      "sha256": "fef2a32272c77384ecbc388fa89af1da9f0cb7b92b87e2ddfadecb7e6b63c451",
+      "bytes": 3821
+    },
+    {
+      "path": "seams.md",
+      "sha256": "05af6c9a2342e04aadfb3d969ca9d566dd02f274c4d4e8663bc529bda475c0f0",
+      "bytes": 6003
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "57fe132977c330850969628f02f39e325295c0a2ecc3f9db6ce5854827d201be",
+      "bytes": 1673
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "5c747eb12f4f6af4c0f5e2b3114ce74da73bee5797110fdac78c2ebb72ad5949",
+      "bytes": 976
+    },
+    {
+      "path": "src/internal/ids.ts",
+      "sha256": "5579b6765df11bdc0ef5e0e730eedd1c9d4a93be3d5b168550826db7da3ffd29",
+      "bytes": 802
+    },
+    {
+      "path": "src/internal/sign.ts",
+      "sha256": "862b9318a809f45d6f353c4c23fbbe8d052d805e17fc021fe3b1c6a1bfda2565",
+      "bytes": 1919
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "ecf026b654f2146e49f8a1c18fd8fd19ebf34871febc0d8b444f2e43a5da12df",
+      "bytes": 4799
+    },
+    {
+      "path": "src/internal/ssrf.ts",
+      "sha256": "b949a357594be56e6eb2151d4dcc67ecd7484532869f7a202004e3853b1cb1c5",
+      "bytes": 8944
+    },
+    {
+      "path": "src/internal/store.ts",
+      "sha256": "6bd155f80e0949e0057613dbb3c6353c7e61c5c9ff6446f874d9e37bd2cf6a2f",
+      "bytes": 8768
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "30d773ea43f583e8cc55304d995e0be1250ca8a3fcf14da29c7329ccc5749033",
+      "bytes": 3324
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "23b9f7276b74166167d6818f7e4b8d787e68e4951cd9f79598d9a990e221c82f",
+      "bytes": 4568
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

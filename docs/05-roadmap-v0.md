@@ -98,6 +98,31 @@ validation, own-table, and an HMAC known-answer vector. An adversarial pass
 header path and the rotation-grace bound before publish. `billing.usage` +
 `webhooks.dispatch` remain to make the `ai-api` pack installable.
 
+**Wave 2 — `webhooks.dispatch` shipped 1.0.0 (2026-06-14), second of the wave.**
+The outbound sender (RFC 0003), API-facing sibling of `webhooks.ingest`: register
+customer endpoints, `dispatch` events to a transactional outbox (**never
+inline** — a slow customer can't block the caller), and `deliverDue` drains it
+out-of-band with capped exponential backoff (honoring `Retry-After`), a delivery
+log, and dead-letter. **Zero-dependency** (node:crypto/dns/https), driver-free.
+Each delivery is signed with **Standard Webhooks** byte-identical to what
+`webhooks.ingest` verifies (pinned to the spec's published known-answer vector).
+**SSRF defense** resolves → validates every record → connects to the validated
+IP (with `servername` for TLS), so the validated IP is the connected IP — no DNS-
+rebinding TOCTOU; a fresh socket per delivery + an absolute per-delivery deadline
+close the keep-alive-pool bypass and the slow-trickle hang. (A 5-lens adversarial
+review caught both, plus that the native `blockList` option isn't honored for
+https — global `fetch` can't be made SSRF-safe zero-dep either.) It owns its
+outbox retry state,
+so it composes with `jobs.queue` (a clock) **or a plain cron with no `requires`
+edge** (RFC 0003 §4). 17 conformance tests against real Postgres + a protocol-
+faithful fake receiver (delivery/retry/backoff/Retry-After/dead-letter/
+idempotency/SSRF-refusal/injection), driving `deliverDue({now})` on a fake clock;
+signing/validation/SSRF-rejection/absolute-deadline run DB-free. A 5-lens
+adversarial review (each finding independently verified) caught + fixed 6 issues
+before publish — incl. the keep-alive-pool SSRF bypass, the slow-trickle hang, and
+that the native `blockList` option isn't honored for https. **`billing.usage` is the last
+Wave 2 part the `ai-api` pack needs.**
+
 **A skeleton is "done well"** — the standard a team actually adopts — only when
 an assembled app demonstrates four things in the running product, not just in
 tests: it is **robust** (the security exhibits are live — `429`, replay/tamper

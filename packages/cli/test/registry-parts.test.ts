@@ -542,3 +542,42 @@ describe("real registry: auth.apikey installs end-to-end (programmatic key auth;
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: webhooks.dispatch installs end-to-end (outbound signed webhooks; zero-dep, DB-backed)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, no env, vendors the migration + internal signer, verifies green", async () => {
+    const res = await addPart(repo, { name: "webhooks.dispatch" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull(); // the connection is an app seam, not a vendored adapter
+    expect(res.envKeys).toEqual([]); // zero-dep + driver-free: no env, the app hands in a SqlExecutor
+
+    await stat(path.join(repo, "parts/webhooks.dispatch/src/index.ts"));
+    await stat(path.join(repo, "parts/webhooks.dispatch/seams.md"));
+    await stat(path.join(repo, "parts/webhooks.dispatch/examples/jobs-wiring.ts"));
+    await stat(path.join(repo, "parts/webhooks.dispatch/ATTESTATION.json"));
+    // the Standard Webhooks signer + SSRF guard are vendored as part internals
+    await stat(path.join(repo, "parts/webhooks.dispatch/src/internal/sign.ts"));
+    await stat(path.join(repo, "parts/webhooks.dispatch/src/internal/ssrf.ts"));
+    // owns tables → its migration is vendored; ships no adapters dir
+    await stat(path.join(repo, "parts/webhooks.dispatch/migrations/001-create-dispatch-tables.sql"));
+    await expect(stat(path.join(repo, "parts/webhooks.dispatch/adapters"))).rejects.toThrow();
+    await expect(stat(path.join(repo, ".env.example"))).rejects.toThrow();
+
+    // a DB-backed part is flagged so the consumer knows to run `partkit migrate`
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("webhooks.dispatch@1.0.0");
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

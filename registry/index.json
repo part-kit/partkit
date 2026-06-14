@@ -107,6 +107,15 @@
       "provides": [
         "auth.apikey@1"
       ]
+    },
+    "webhooks.dispatch": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "webhooks.dispatch@1"
+      ]
     }
   }
 }

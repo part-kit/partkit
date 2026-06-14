@@ -123,10 +123,12 @@ describe("partkit migrate", () => {
     expect(db.ledger).toHaveLength(3);
     expect(db.ledger[0]).toMatchObject({ part: "audit.log", seq: 1, name: "001-create-events.sql" });
     expect(db.ledger[0]!.sha256).toMatch(/^[0-9a-f]{64}$/);
-    // Each body is bracketed by its own BEGIN/COMMIT.
+    // Each body is bracketed by its own BEGIN/COMMIT, with search_path reset
+    // before the ledger write (so a migration that moves search_path can't hide it).
     const i = db.log.indexOf("CREATE TABLE audit_events ()");
     expect(db.log[i - 1]).toBe("BEGIN");
-    expect(db.log[i + 2]).toBe("COMMIT");
+    expect(db.log[i + 1]).toBe("RESET search_path");
+    expect(db.log[i + 3]).toBe("COMMIT");
   });
 
   it("is idempotent: a second run applies nothing", async () => {

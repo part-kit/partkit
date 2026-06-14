@@ -262,3 +262,281 @@ h1, h2, h3 { line-height: 1.15; margin: 0 0 1rem; letter-spacing: -0.02em; }
 .prompt-bar button { font-family: var(--mono); font-size: 12px; color: var(--accent); background: none; border: 1px solid rgba(255, 106, 26, 0.4); border-radius: 6px; padding: 3px 12px; cursor: pointer; }
 .prompt-bar button:hover { background: var(--accent-dim); }
 .prompt-card pre { margin: 0; padding: 18px 20px; font-family: var(--mono); font-size: 13px; line-height: 1.75; white-space: pre-wrap; color: var(--text); }
+
+/* ── what / why split (chassis vs body) ──────────────────────── */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 760px) { .split { grid-template-columns: 1fr; } }
+.split-col { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
+.split-col.pk { border-top: 2px solid var(--accent); }
+.split-col.you { border-top: 2px solid var(--border-bright); }
+.split-tag { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; color: var(--text-dim); }
+.split-col.pk .split-tag { color: var(--accent); }
+.split-col ul { list-style: none; margin: 12px 0 0; padding: 0; }
+.split-col li { font-size: 14px; color: var(--text-dim); padding: 7px 0 7px 20px; position: relative; border-top: 1px dashed var(--border); }
+.split-col li:first-child { border-top: 0; }
+.split-col li::before { content: "›"; position: absolute; left: 4px; }
+.split-col.pk li::before { color: var(--accent); }
+.split-col.you li::before { color: var(--text-dim); }
+
+/* ── flip diff grid + boundary proof ─────────────────────────── */
+.flip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+@media (max-width: 760px) { .flip-grid { grid-template-columns: 1fr; } }
+.wall-proof { margin-top: 22px; }
+
+/* ── closer ──────────────────────────────────────────────────── */
+.closer { text-align: center; padding: 20px 0 8px; }
+.closer h2 { font-size: 26px; max-width: 660px; margin: 0 auto 20px; }
+.closer .hero-ctas { justify-content: center; }
+
+/* ── cost-crossover chart ── */
+.crossover { font-family: var(--sans); }
+
+.crossover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  margin-bottom: 22px;
+}
+
+.crossover-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-inset);
+  padding: 3px;
+  gap: 2px;
+}
+.crossover-tab {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.crossover-tab:hover { color: var(--text); }
+.crossover-tab.is-active {
+  color: var(--text);
+  background: var(--bg-raised);
+  box-shadow: inset 0 0 0 1px var(--border-bright);
+}
+
+.crossover-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.crossover-leg { display: inline-flex; align-items: center; gap: 7px; }
+.crossover-leg i {
+  width: 16px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
+  display: inline-block;
+}
+.crossover-leg-managed i { border-top-color: var(--accent); }
+.crossover-leg-owned i { border-top-color: var(--green); }
+
+.crossover-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* grid */
+.crossover-grid line { stroke: var(--border); stroke-width: 1; }
+.crossover-ylabel,
+.crossover-xlabel {
+  font-family: var(--mono);
+  font-size: 13px;
+  fill: var(--text-dim);
+}
+.crossover-xtick {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+/* crossover band */
+.crossover-mark rect { fill: var(--accent-dim); }
+.crossover-mark line {
+  stroke: var(--border-bright);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.crossover-mark-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--accent-bright);
+}
+.crossover-mark-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+}
+
+/* the shaded gap between the two lines */
+.crossover-gap {
+  fill: var(--accent);
+  opacity: 0.08;
+}
+
+/* lines */
+.crossover-line {
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.crossover-line-owned { stroke: var(--green); }
+.crossover-line-managed { stroke: var(--accent); }
+
+/* line draw-in */
+.crossover-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: crossover-draw 1.1s ease-out forwards;
+}
+.crossover-line-managed { animation-delay: 0.25s; }
+@keyframes crossover-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* dots */
+.crossover-dot { opacity: 0; animation: crossover-pop 0.3s ease-out forwards; }
+.crossover-dot-owned { fill: var(--green); animation-delay: 1.1s; }
+.crossover-dot-managed { fill: var(--accent); animation-delay: 1.35s; }
+@keyframes crossover-pop { to { opacity: 1; } }
+
+/* end-value callouts */
+.crossover-callout text {
+  font-family: var(--mono);
+  font-weight: 700;
+  opacity: 0;
+  animation: crossover-pop 0.4s ease-out forwards;
+  animation-delay: 1.5s;
+}
+.crossover-callout-managed text {
+  fill: var(--accent-bright);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+.crossover-callout-owned text {
+  fill: var(--green);
+  font-size: 15px;
+}
+
+/* captions */
+.crossover-caption {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 14px 0 0;
+}
+.crossover-caption + .crossover-caption { margin-top: 6px; }
+
+/* reduced motion — show final state */
+@media (prefers-reduced-motion: reduce) {
+  .crossover-line,
+  .crossover-dot,
+  .crossover-callout text {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* ── chassis schematic ── */
+.chassis { width: 100%; max-width: 540px; display: block; margin: 0 auto; overflow: visible; }
+
+/* baseplate — the ground the app rests on */
+.chassis .ch-plate .p-top { fill: #161a21; stroke: var(--border-bright); stroke-width: 1; }
+.chassis .ch-plate .p-left { fill: #0d1014; stroke: var(--border); }
+.chassis .ch-plate .p-right { fill: #12151b; stroke: var(--border); }
+
+/* chassis part-blocks — solid, machined, load-bearing */
+.chassis .ch-block .f-top { fill: #2a323e; stroke: #39414e; stroke-width: 1; }
+.chassis .ch-block .f-left { fill: #151a20; stroke: var(--border); }
+.chassis .ch-block .f-right { fill: #1b212a; stroke: var(--border); }
+.chassis .ch-face-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.01em; fill: #aeb4be; pointer-events: none; }
+
+/* billing.subscription cap — the accent-keyed seating deck */
+.chassis .ch-cap .cap-top { fill: #2c2620; stroke: #5a4a36; stroke-width: 1; }
+.chassis .ch-cap .cap-left { fill: #171310; stroke: var(--border); }
+.chassis .ch-cap .cap-right { fill: #1d1812; stroke: var(--border); }
+.chassis .cap-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.01em; fill: var(--accent-bright); pointer-events: none; }
+
+/* settle: machined parts seating into place */
+.chassis .ch-block-inner,
+.chassis .ch-cap-inner {
+  animation: ch-settle 0.85s cubic-bezier(0.22, 0.92, 0.24, 1.12) both;
+  animation-delay: var(--ch-delay);
+}
+@keyframes ch-settle {
+  from { transform: translate(var(--dx, 0), var(--dy, -40px)); opacity: 0; }
+  55% { opacity: 1; }
+  to { transform: translate(0, 0); opacity: 1; }
+}
+
+/* YOUR PRODUCT — the lighter, dashed shell the agent builds */
+.chassis .ch-product { opacity: 0; animation: ch-fade 0.7s ease 0.95s forwards; }
+.chassis .ch-product .prod-top { fill: rgba(150, 178, 212, 0.10); stroke: #aab2bd; stroke-width: 1.5; stroke-dasharray: 7 5; stroke-linejoin: round; }
+.chassis .ch-product .prod-left { fill: rgba(120, 145, 180, 0.07); stroke: #828b97; stroke-width: 1.2; stroke-dasharray: 7 5; stroke-linejoin: round; }
+.chassis .ch-product .prod-right { fill: rgba(100, 122, 155, 0.06); stroke: #828b97; stroke-width: 1.2; stroke-dasharray: 7 5; stroke-linejoin: round; }
+.chassis .ch-product .prod-edge { fill: none; stroke: #828b97; stroke-width: 1.1; stroke-dasharray: 7 5; }
+
+/* SEAMS — the signature orange line where product meets chassis */
+.chassis .ch-seams .seam {
+  fill: none; stroke: var(--accent); stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 4px rgba(255, 106, 26, 0.55));
+  animation: ch-draw 0.7s ease forwards, ch-seampulse 3.4s ease-in-out 2.4s infinite;
+}
+.chassis .ch-seams .seam:nth-child(1) { animation-delay: 1.5s, 2.4s; }
+.chassis .ch-seams .seam:nth-child(2) { animation-delay: 1.65s, 2.55s; }
+.chassis .ch-seams .seam:nth-child(3) { animation-delay: 1.85s, 2.75s; }
+@keyframes ch-draw { to { stroke-dashoffset: 0; } }
+@keyframes ch-seampulse {
+  50% { stroke: var(--accent-bright); filter: drop-shadow(0 0 9px rgba(255, 138, 71, 0.85)); }
+}
+
+/* layer labels */
+.chassis .layer-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; }
+.chassis .product-label { fill: #c4cad3; }
+.chassis .chassis-label { fill: var(--text-dim); }
+.chassis .ch-layers { opacity: 0; animation: ch-fade 0.6s ease 1.2s forwards; }
+
+/* engineering callouts */
+.chassis .ch-callouts .callout path { fill: none; stroke: #3a414d; stroke-width: 1; }
+.chassis .ch-callouts .callout .dot { fill: var(--accent); }
+.chassis .ch-callouts .callout text { font-family: var(--mono); font-size: 10.5px; fill: var(--text-dim); }
+.chassis .ch-callouts .callout { opacity: 0; animation: ch-fade 0.5s ease forwards; }
+.chassis .ch-callouts .c1 { animation-delay: 2.0s; }
+.chassis .ch-callouts .c2 { animation-delay: 2.12s; }
+.chassis .ch-callouts .c3 { animation-delay: 2.24s; }
+.chassis .ch-callouts .c4 { animation-delay: 2.36s; }
+.chassis .ch-callouts .c5 { animation-delay: 2.48s; }
+@keyframes ch-fade { to { opacity: 1; } }
+
+/* reduced-motion: show everything statically */
+@media (prefers-reduced-motion: reduce) {
+  .chassis .ch-block-inner,
+  .chassis .ch-cap-inner { animation: none; transform: none; opacity: 1; }
+  .chassis .ch-product,
+  .chassis .ch-layers,
+  .chassis .ch-callouts .callout { animation: none; opacity: 1; }
+  .chassis .ch-seams .seam { animation: none; stroke-dashoffset: 0; }
+}
