@@ -81,6 +81,23 @@ skeleton; Wave 2** (`auth.apikey`, `webhooks.dispatch`, `billing.usage`,
 before any shallow" still governs — Wave 2 is sequenced, not parallel, and each
 part meets the identical bar.
 
+**Wave 2 status — `auth.apikey` shipped 1.0.0 (2026-06-14), first of the wave.**
+The programmatic sibling of `auth.session` (RFC 0002): issue / scope / verify /
+rotate / revoke long-lived `ak…` bearer keys. **Zero-dependency** (node:crypto)
+and driver-free — keys are `<prefix>_<192-bit secret>`; only a salted one-way
+HMAC-SHA256 digest + salt persist (a fast keyed hash, **not** a KDF — the
+secret's entropy already defeats brute force and verify is the hot path; RFC 0002
+amended accordingly). `verifyKey` discloses `revoked`/`expired`/`forbidden` only
+*after* a constant-time secret match, so a guesser only ever sees `invalid` (no
+existence oracle); a decoy hash keeps the unknown-prefix path timing-uniform.
+`ownerId` is opaque, so it secures an API product with **no human login at all**.
+13 conformance tests against real Postgres (issue/verify/scope/rotate/revoke/
+injection, gated on `PARTKIT_TEST_DATABASE_URL`) + DB-free typed-error,
+validation, own-table, and an HMAC known-answer vector. An adversarial pass
+(timing/enumeration, scope bypass, secret leak, DoS, rotation abuse) hardened the
+header path and the rotation-grace bound before publish. `billing.usage` +
+`webhooks.dispatch` remain to make the `ai-api` pack installable.
+
 **A skeleton is "done well"** — the standard a team actually adopts — only when
 an assembled app demonstrates four things in the running product, not just in
 tests: it is **robust** (the security exhibits are live — `429`, replay/tamper

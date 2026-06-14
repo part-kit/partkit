@@ -77,3 +77,24 @@ HTTP middleware seam: `requireApiKey(scopes?)(request) => ApiKeyContext`.
 - Per-key rate-limit budgets handed to `ratelimit.api` as the identity key (seam, documented in both seams.md files).
 - Per-key usage metering feeding `billing.usage` (the metering key is the API key id).
 - HMAC request signing (beyond bearer presentation) as an additive minor.
+
+## Amendment — hash construction (2026-06-14, accepted with `auth.apikey@1.0.0`)
+
+§4 originally suggested scrypt/argon2 "by analogy to password storage". The
+implementing part deliberately does **not** use a password-hashing KDF. It
+stores **HMAC-SHA256(key = per-key salt, message = secret)** — a salted, one-way,
+fast keyed hash — compared in constant time with `timingSafeEqual`.
+
+Rationale: the key's secret is **192 bits of machine-generated randomness**, so
+brute force is already impossible at any hash speed — there is no low-entropy
+human choice, dictionary, or reuse for a slow KDF to defend. Meanwhile
+`verifyKey` is the per-request **hot path**; a KDF would add tens of milliseconds
+and consume a libuv threadpool slot per call for no security gain. A KDF would
+become correct only if lower-entropy keys were introduced — which §4's format
+(`<prefix>_<base62(randomBytes(24))>`) precludes.
+
+Invariant §3.2 should be read as "a **salted one-way hash**" rather than
+"argon2id or scrypt" specifically. A known-answer conformance vector pins the
+HMAC-SHA256 construction so a weaker or reversible substitute cannot pass. A
+server-side pepper is intentionally omitted (negligible gain at 192 bits; it
+would break the part's zero-env property). See the part's SPEC.md.

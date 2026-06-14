@@ -1,0 +1,26 @@
+{
+  "capability": "auth.apikey",
+  "capability_version": 1,
+  "status": "draft",
+  "summary": "Programmatic API-key authentication — issue, scope, verify, rotate, and revoke long-lived bearer keys through a contract-stable interface and a driver-free SqlExecutor seam. The API-facing sibling of auth.session.",
+  "interface": {
+    "exports": [
+      "apiKeys(db: SqlExecutor): ApiKeyStore",
+      "ApiKeyStore { issueKey(input: IssueKeyInput): Promise<IssuedKey>; verifyKey(presented: string, opts?: VerifyOptions): Promise<ApiKeyContext>; rotateKey(id: string, opts?: RotateOptions): Promise<IssuedKey>; revokeKey(id: string): Promise<void>; listKeys(ownerId: string): Promise<ApiKeyInfo[]>; requireApiKey(scopes?: string[]): (request: Request) => Promise<ApiKeyContext> }",
+      "class ApiKeyError extends Error { code: ApiKeyErrorCode }"
+    ],
+    "events": [],
+    "http_routes": []
+  },
+  "invariants": [
+    "Importing the part performs no I/O and never throws; inputs are validated at call time, and every failure — invalid input or a storage error from the executor — surfaces as a typed ApiKeyError (raw driver errors never escape)",
+    "issueKey returns the plaintext key exactly once; only a salted one-way hash and a non-secret display prefix persist, so the key cannot be recovered from storage, and listKeys never returns plaintext or hash material",
+    "verifyKey resolves a valid active key to its context via a single indexed prefix lookup and a constant-time compare; a wrong secret, an unknown prefix, and a wrong-length secret are indistinguishable — all rejected as `invalid`, with no oracle revealing whether a prefix exists",
+    "A revoked key is rejected as `revoked` and a (naturally- or rotation-) expired key as `expired`, but only to a caller presenting the correct secret; revocation takes effect immediately and an expiry takes effect at its recorded time",
+    "requireScopes is all-of: a key missing any required scope is rejected as `forbidden` and never silently downgraded; requireApiKey enforces the same over the `Authorization: Bearer` header and rejects a missing/garbled header as `malformed`",
+    "rotateKey issues a new key and keeps the old one valid only until a bounded, recorded grace window elapses (default 0 = immediate); after the window the old key is rejected as `expired` while the new key verifies",
+    "Secret material (plaintext keys, hashes, salts) never appears in error messages, in ApiKeyError, or in any value the part returns",
+    "The part operates solely through the provided SqlExecutor seam — it imports no database driver — and every statement it issues targets only its own auth_apikey_keys table; every input is parameterized, so SQL metacharacters are stored literally and never executed"
+  ],
+  "notes": "The programmatic sibling of auth.session, added by RFC 0002 to make the AI-app / API-product skeleton (App Pack ai-api) assemblable from verified parts. Zero-dependency (node:crypto) and driver-free: the connection is the app's SqlExecutor seam, so the part ships zero adapters and zero env and owns the auth_apikey_keys table. Keys are <prefix>_<192-bit secret>; only HMAC-SHA256(salt, secret) + salt persist (a fast keyed hash, not a KDF — the secret's entropy already defeats brute force and verify is the hot path; see SPEC.md and RFC 0002 amendment). ownerId is opaque, so the part works even with no human login. Conformance runs against real Postgres (gated on PARTKIT_TEST_DATABASE_URL); typed-error, validation, own-table, and HMAC known-answer invariants also run DB-free. The suite lives with the implementing part until a second provider exists, then moves here (docs/02 §3-4)."
+}

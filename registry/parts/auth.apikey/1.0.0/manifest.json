@@ -1,0 +1,90 @@
+{
+  "manifest_version": 1,
+  "part": "auth.apikey",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "9647aff65c2bb732d2af5e82e45c74896780b571b03f3051f1bb58149837ba8e",
+      "bytes": 7014
+    },
+    {
+      "path": "conformance/apikey.test.ts",
+      "sha256": "4d4790d3d068c287b4e5a5aea6b1ce501ba54b188dd1f838c7b89f3bb23f759d",
+      "bytes": 16302
+    },
+    {
+      "path": "conformance/recording-executor.ts",
+      "sha256": "63e69371bdc2208cb992b97ca858b773cf514d69407e8012b84c13c8a9de0c73",
+      "bytes": 1833
+    },
+    {
+      "path": "contract.json",
+      "sha256": "26d32ca54bd1ac97c002098f0fea55ce8601798be4f1f92b62e3707ee90f7bd9",
+      "bytes": 3055
+    },
+    {
+      "path": "examples/key-dashboard.ts",
+      "sha256": "1f0252e85ebfa8a6c8728a9ae58fe5372a748f8a812937fb783f416741c9e563",
+      "bytes": 2405
+    },
+    {
+      "path": "examples/pg-executor.ts",
+      "sha256": "681e2f6ba91c566870aa6cc733f2fc2853c4bcdb0aa23ef7d4786957c83062dd",
+      "bytes": 1060
+    },
+    {
+      "path": "examples/protect-route.ts",
+      "sha256": "239b62a5d08495d5abf920e1d6e0da73269899ceaf93bba6eace8eb0d1bca6e6",
+      "bytes": 1808
+    },
+    {
+      "path": "migrations/001-create-apikey-tables.sql",
+      "sha256": "486c832c783270c36c8de36aa6981b35f01f393cea995d8f1506c09e7d9fbe08",
+      "bytes": 1793
+    },
+    {
+      "path": "seams.md",
+      "sha256": "cd349bbf4b5fb152b558f46b6476e586e494892b82b44303e2f4a1e0ae724897",
+      "bytes": 6320
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "5e52d72c0e326ceca6ff56327c54d5ac9a6838f0307bd623d38303c7c1d7634b",
+      "bytes": 1427
+    },
+    {
+      "path": "src/internal/errors.ts",
+      "sha256": "5140c7146730a4eb325691bae5b1b99605a5b7da613abaa3ccea4b419f685b44",
+      "bytes": 1711
+    },
+    {
+      "path": "src/internal/keys.ts",
+      "sha256": "2b7d910385e004ed39950d6b05a8145a176f7523206d89138c59f1bc93636adc",
+      "bytes": 5059
+    },
+    {
+      "path": "src/internal/sql.ts",
+      "sha256": "949ced9c5d25c01d5c9a00bba7bb03fefc3dbcf97d9f463e1ce5da4dbc8b182a",
+      "bytes": 4013
+    },
+    {
+      "path": "src/internal/store.ts",
+      "sha256": "7fd60de27641b7dd7a23e2351e259bb8185689a9368c2c8241fcf09d32db3d48",
+      "bytes": 8295
+    },
+    {
+      "path": "src/internal/types.ts",
+      "sha256": "e139f893a4a57a34befaca1442b5e8d6aa28acc92f11703b3a599120fd206309",
+      "bytes": 3590
+    },
+    {
+      "path": "src/internal/validate.ts",
+      "sha256": "bd43c26c5263a7ebc2a065b3b894e72348422f3883d9cdbad6f0bcdcff49b31c",
+      "bytes": 3898
+    }
+  ],
+  "attestations": [
+    "default"
+  ]
+}

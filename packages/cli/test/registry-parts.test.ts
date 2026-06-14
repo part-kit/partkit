@@ -503,3 +503,42 @@ describe("real registry: billing.subscription installs end-to-end (stripe adapte
     expect(ver.ok).toBe(true);
   });
 });
+
+describe("real registry: auth.apikey installs end-to-end (programmatic key auth; zero-dep, DB-backed)", () => {
+  let repo: string;
+
+  beforeAll(async () => {
+    repo = path.join(await makeTempDir("partkit-realreg-"), "app");
+    await mkdir(repo, { recursive: true });
+    execFileSync("git", ["init", "-q", repo]);
+    await initRepo(repo, { registrySource: REPO_REGISTRY });
+  });
+
+  it("adds with no adapter, no env, vendors the migration + internal hash, verifies green", async () => {
+    const res = await addPart(repo, { name: "auth.apikey" });
+    expect(res.version).toBe("1.0.0");
+    expect(res.adapter).toBeNull(); // the connection is an app seam, not a vendored adapter
+    expect(res.envKeys).toEqual([]); // zero-dep + driver-free: no env, the app hands in a SqlExecutor
+
+    await stat(path.join(repo, "parts/auth.apikey/src/index.ts"));
+    await stat(path.join(repo, "parts/auth.apikey/seams.md"));
+    await stat(path.join(repo, "parts/auth.apikey/examples/protect-route.ts"));
+    await stat(path.join(repo, "parts/auth.apikey/examples/key-dashboard.ts"));
+    await stat(path.join(repo, "parts/auth.apikey/ATTESTATION.json"));
+    // the crypto core is vendored as a part internal
+    await stat(path.join(repo, "parts/auth.apikey/src/internal/keys.ts"));
+    // owns a table → its migration is vendored; ships no adapters dir
+    await stat(path.join(repo, "parts/auth.apikey/migrations/001-create-apikey-tables.sql"));
+    await expect(stat(path.join(repo, "parts/auth.apikey/adapters"))).rejects.toThrow();
+    await expect(stat(path.join(repo, ".env.example"))).rejects.toThrow();
+
+    // a DB-backed part is flagged so the consumer knows to run `partkit migrate`
+    expect(res.warnings.some((w) => /migrat/i.test(w))).toBe(true);
+
+    const agents = await readFile(path.join(repo, "AGENTS.md"), "utf8");
+    expect(agents).toContain("auth.apikey@1.0.0");
+
+    const ver = await verifyRepo(repo);
+    expect(ver.ok).toBe(true);
+  });
+});

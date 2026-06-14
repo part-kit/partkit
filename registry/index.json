@@ -98,6 +98,15 @@
       "provides": [
         "billing.subscription@1"
       ]
+    },
+    "auth.apikey": {
+      "latest": "1.0.0",
+      "versions": [
+        "1.0.0"
+      ],
+      "provides": [
+        "auth.apikey@1"
+      ]
     }
   }
 }

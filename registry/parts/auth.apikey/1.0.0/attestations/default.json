@@ -1,0 +1,15 @@
+{
+  "part": "auth.apikey",
+  "version": "1.0.0",
+  "adapter": null,
+  "content_hash": "sha256:88bea6a1095a520809f7b37d1a7cc6a01bcc99e27f0f32db501128b95c90e04a",
+  "verified_at": "2026-06-14T08:13:32.070Z",
+  "dependency_matrix": {
+    "node": "25.3.0"
+  },
+  "conformance_run": "local:scripts/publish-part.mjs",
+  "tests_passed": 13,
+  "result_hash": "sha256:7549c5f89e646aed176d826a13cdf84417afb83148aa8747e910e385d6acca58",
+  "signature": "dev:unsigned",
+  "expires": "2026-06-28T08:13:32.071Z"
+}
