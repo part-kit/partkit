@@ -1,6 +1,6 @@
 {
   "name": "partkit",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Verified, attested standard parts for AI coding agents — the CLI",
   "type": "module",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@part-kit/core": "0.3.0",
+    "@part-kit/core": "^0.4.0",
     "commander": "^12.1.0",
     "pg": "^8.21.0"
   },

@@ -11,9 +11,13 @@
     "flags.feature",
     "email.transactional"
   ],
-  "distinctive": ["search.fulltext", "flags.feature"],
+  "distinctive": [
+    "search.fulltext",
+    "flags.feature"
+  ],
   "adapters": {
-    "email.transactional": "resend"
+    "email.transactional": "resend",
+    "billing.subscription": "stripe"
   },
   "seams_the_agent_writes": [
     "listing / content pages",

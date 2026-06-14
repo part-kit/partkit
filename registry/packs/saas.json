@@ -16,7 +16,8 @@
   ],
   "adapters": {
     "email.transactional": "resend",
-    "webhooks.ingest": "stripe"
+    "webhooks.ingest": "stripe",
+    "billing.subscription": "stripe"
   },
   "seams_the_agent_writes": [
     "pricing page + PlanCatalog",
